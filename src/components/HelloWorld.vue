@@ -1,17 +1,57 @@
 <template>
-  <div class="accueil">
-    <div class="presentation">
-      <h2>Lorem Ipsum</h2>
-      <p class="texte-presentation">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Suscipit officiis, velit voluptates vero ipsam praesentium quos deserunt at doloremque enim ea dolor ipsa modi quasi accusantium itaque sequi error quam!</p>
-      <p class="texte-presentation">Voluptates vero ipsam praesentium quos deserunt at doloremque enim ea dolor ipsa modi quasi accusantium itaque sequi error quam!</p>
-    </div>
-    <div class="login">
+  <div id="accueil">
+    <h2>Lorem Ipsum</h2>
+    <p class="text-presentation">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsam, quisquam! Impedit et praesentium pariatur quod, dicta facilis eaque vitae eos quam explicabo vel. Repellat itaque magnam expedita deleniti consectetur nam!</p>
+    <p class="text-presentation">Laborum deserunt unde pariatur delectus maxime in expedita nesciunt beatae voluptates recusandae vero amet repellendus. Velit.</p>
+    <v-container class="grey lighten-5" style="margin-top: 50px">
+        <v-row
+          justify="center"
+        >
+          <v-col>
+            <v-card
+              class="pa-2"
+              outlined
+              tile
+              style="background:rgba(0,0,0,0.5)"
+            >
+              <h3>Connexion</h3>
+              <v-form
+                class="form-connexion"
+              >
+                <v-text-field
+                  v-model="email"
+                  label="Email"
+                  required
+                ></v-text-field>
 
-    </div>
-    <div class="register">
+                <v-text-field
+                  v-model="password"
+                  label="Mot de passe"
+                  required
+                ></v-text-field>
 
+                <v-btn
+                  :disabled="!valid"
+                  color="success"
+                  @click="login"
+                >
+                  Se connecter
+                </v-btn>
+              </v-form>
+            </v-card>
+          </v-col>
+          <v-col>
+            <v-card
+              class="pa-2"
+              outlined
+              tile
+            >
+              One of two columns
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
     </div>
-  </div>
 </template>
 
 <script>
@@ -22,17 +62,21 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.presentation {
+#accueil {
+  margin-top: 20px;
+}
+
+h3, h2 {
   text-align: center;
-  width: 75%;
-  margin: 0 auto;
-}
-
-h2 {
   color: white;
 }
 
-.texte-presentation {
+.text-presentation {
   color: white;
+  text-align: center;
+}
+
+.form-connexion {
+  padding: 10px;
 }
 </style>
