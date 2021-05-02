@@ -14,26 +14,30 @@
               tile
               style="background:rgba(0,0,0,0.5)"
             >
-              <h3>Connexion</h3>
+              <h3 class="titre-boxe">Connexion</h3>
               <v-form
                 class="form-connexion"
               >
                 <v-text-field
                   v-model="email"
                   label="Email"
+                  color="#FFFFFF"
                   required
+                  append-icon="mdi-email-outline"
                 ></v-text-field>
 
                 <v-text-field
                   v-model="password"
                   label="Mot de passe"
                   required
+                  color="#FFFFFF"
+                  append-icon="mdi-lock-outline"
                 ></v-text-field>
 
                 <v-btn
-                  :disabled="!valid"
-                  color="success"
                   @click="login"
+                  color="#F06292"
+                  :style="{left: '50%', transform:'translateX(-50%)'}"
                 >
                   Se connecter
                 </v-btn>
@@ -45,8 +49,44 @@
               class="pa-2"
               outlined
               tile
+              style="background:rgba(0,0,0,0.5)"
             >
-              One of two columns
+              <h3 class="titre-boxe">Inscription</h3>
+              <v-form
+                class="form-connexion"
+              >
+                <v-text-field
+                  v-model="prenom"
+                  label="Prénom"
+                  required
+                  color="#FFFFFF"
+                  append-icon="mdi-account-outline"
+                ></v-text-field>
+                <v-text-field
+                  v-model="email"
+                  label="Email"
+                  required
+                  color="#FFFFFF"
+                  append-icon="mdi-email-outline"
+                ></v-text-field>
+                <v-text-field
+                  v-model="password"
+                  label="Mot de passe"
+                  required
+                  color="#FFFFFF"
+                  append-icon="mdi-lock-outline"
+                  class="text-field-style"
+                ></v-text-field>
+                <v-btn
+                  align-center
+                  justify-center
+                  @click="register"
+                  color="#F06292"
+                  :style="{left: '50%', transform:'translateX(-50%)'}"
+                >
+                  S'inscrire
+                </v-btn>
+              </v-form>
             </v-card>
           </v-col>
         </v-row>
@@ -66,17 +106,26 @@ export default {
   margin-top: 20px;
 }
 
+body {
+  font-family: 'Segoe UI';
+}
+
 h3, h2 {
   text-align: center;
   color: white;
 }
 
+.titre-boxe {
+  margin-top: 25px
+}
+
 .text-presentation {
+  margin-top: 30px;
   color: white;
   text-align: center;
 }
 
 .form-connexion {
-  padding: 10px;
+  padding: 30px;
 }
 </style>
