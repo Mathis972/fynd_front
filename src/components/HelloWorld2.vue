@@ -7,7 +7,7 @@
             <v-row class="content-profile" align="center" justify="center" >
               <v-col cols="4" md="4">
                 <v-avatar class="" color="grey darken-1" size="52">
-                <img
+                <img class="image"
                     alt="Avatar"
                     src="https://avatars0.githubusercontent.com/u/9064066?v=4&s=460"
                   >
@@ -36,6 +36,27 @@
         <v-col cols="2" md="2">
       <chat></chat>
       </v-col>
+      <v-col cols="10" md="10">
+          <v-main>
+      <!--  -->
+    </v-main>
+
+    <v-footer
+      app
+      color="transparent"
+      height="72"
+      inset
+    >
+      <v-text-field
+        background-color="grey lighten-1"
+        dense
+        flat
+        hide-details
+        rounded
+        solo
+      ></v-text-field>
+    </v-footer>
+      </v-col>
       </v-row>
     </v-main>
   </v-app>
@@ -61,4 +82,13 @@ background: linear-gradient(
 .content-profile{
   margin:0px!important;
 }
+.image{
+  border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      margin-right: 10px;
+      box-shadow: 1px 2px 3px rgba(0,0,0,0.5);
+}
+
 </style>
