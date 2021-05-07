@@ -129,3 +129,23 @@ h3, h2 {
   padding: 30px;
 }
 </style>
+
+<style>
+
+.theme--light.v-label {
+  color:white !important;
+}
+
+.theme--light.v-icon {
+  color:white !important;
+}
+
+.theme--light.v-text-field:not(.v-input--has-state):hover > .v-input__control > .v-input__slot:before {
+  border-color:white !important;
+}
+
+.theme--light.v-text-field > .v-input__control > .v-input__slot:before {
+    border-color:white !important;
+}
+
+</style>
