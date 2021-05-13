@@ -59,14 +59,14 @@
         <v-card-text class="flex-grow-1 overflow-y-auto">
           <template v-for="(msg) in messages">
 
-            <div :class="{ 'd-flex flex-row-reverse': msg.me }">
-              <v-avatar v-if="!msg.me" class="ma-4" color="grey darken-1" size="52">
+            <div :class="{'d-flex flex-row-reverse' : ifIdTrue(msg.me) }">
+              <v-avatar v-if="!ifIdTrue(msg.me)" class="ma-4" color="grey darken-1" size="52">
                 <img alt="Avatar" :src= msg.src >
               </v-avatar>
                 <template >
 
-                  <v-chip :color="msg.me ? '#7626DE' : ''" dark style="height:auto;white-space: normal;"
-                    class="pa-4 mb-2" v-on="on">
+                  <v-chip :color="ifIdTrue(msg.me) ? '#7626DE' : 'grey darken-1'" dark style="height:auto;white-space: normal;"
+                    class="pa-4 mb-2" >
                     {{ msg.content }}
                     <sub class="ml-2" style="font-size: 0.5rem;">{{ msg.created_at }}</sub>
                   </v-chip>
@@ -79,11 +79,11 @@
       </v-card>
     </v-main>
 
-    <v-footer app color="transparent" height="72" inset>
+    <v-footer app  height="72" inset>
       <v-row>
         <v-col cols="12">
-          <v-text-field label="type_a_message" type="text" no-details outlined :prepend-icon="icon"
-            append-outer-icon="mdi-send" filled clear-icon="mdi-close-circle" clearable></v-text-field>
+          <v-text-field v-model="inputMessages" label="type_a_message" type="text" no-details outlined
+            append-outer-icon="mdi-send" @click:append-outer="sendMessage" @keydown.enter="sendMessage" filled clear-icon="mdi-close-circle" clearable></v-text-field>
         </v-col>
       </v-row>
     </v-footer>
@@ -92,47 +92,61 @@
 
 <script>
 export default {
-  data: () => ({
-    messages: [{
-      content: 'lorem ipsum',
-      me: true,
-      created_at: '11:11am'
+  async created () {
+    await this.idLaunch()
+    await this.setUserName()
+    await this.full()
+  },
+  methods: {
+    ifIdTrue (data) {
+      if (data === this.id) {
+        return true
+      } else {
+        return false
+      }
     },
-    {
-      content: 'dolor',
-      me: false,
-      created_at: '11:11am',
-      src: 'https://cdn.vuetifyjs.com/images/lists/5.jpg'
+    sendMessage () {
+      this.$socket.client.emit('message', {
+        content: this.inputMessages,
+        me: this.id,
+        created_at: `${this.timeHours.getHours()}: ${this.timeHours.getMinutes()}`,
+        src: 'https://cdn.vuetifyjs.com/images/lists/5.jpg'
+
+      }) // send the content of the message bar to the server
+      this.inputMessages = ''
     },
-    {
-      content: 'dolor',
-      me: false,
-      created_at: '11:11am',
-      src: 'https://cdn.vuetifyjs.com/images/lists/5.jpg'
+    idLaunch () {
+      this.$socket.client.emit('idLaunch')
     },
-    {
-      content: 'dolor',
-      me: false,
-      created_at: '11:11am',
-      src: 'https://cdn.vuetifyjs.com/images/lists/5.jpg'
+    setUserName () {
+      this.$socket.client.emit('join', this.id)
     },
-    {
-      content: 'dolor',
-      me: true,
-      created_at: '11:11am'
-    },
-    {
-      content: 'dolor',
-      me: false,
-      created_at: '11:12am',
-      src: 'https://cdn.vuetifyjs.com/images/lists/5.jpg'
-    },
-    {
-      content: 'dolor',
-      me: false,
-      created_at: '11:14am',
-      src: 'https://cdn.vuetifyjs.com/images/lists/5.jpg'
+    full () {
+      this.$socket.client.emit('full')
     }
+  },
+  sockets: {
+    connect () {
+      console.log('connected to chat server')
+    },
+    message (data) {
+      console.log(data)
+      this.messages.push(data)
+    },
+    id (data) {
+      this.id = data
+      console.log(data)
+    },
+    full (data) {
+      console.log('tu es kick')
+      this.$socket.leave('room1')
+    }
+  },
+  data: () => ({
+    timeHours: new Date(),
+    id: '',
+    inputMessages: '',
+    messages: [
     ],
     items: [{
       header: 'Today'
