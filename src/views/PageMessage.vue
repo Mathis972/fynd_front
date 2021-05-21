@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import Home from '../components/HelloWorld3'
+import Home from '../components/Chat'
 
 export default {
   name: 'Message',
