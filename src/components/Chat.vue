@@ -3,10 +3,10 @@
     <v-app-bar app clipped-right flat height="72" color=" rgba(0, 0, 0, 0.87)">
       <div style="display:flex" align="center">
         <v-avatar class="" color="grey darken-1" size="52">
-          <img alt="Avatar" :src=img>
+          <img alt="Avatar" :src=getAvatarProfil>
         </v-avatar>
         <div class="info" style="display:grid;margin-left:15px;">
-          <span class="user">{{ user }}</span>
+          <span class="user">{{ user.prenom }}</span>
           <span class="time">{{ time }}</span>
         </div>
       </div>
@@ -17,27 +17,36 @@
         <v-row class="content-profile" align="center" justify="center">
           <v-col cols="4" md="4">
             <v-avatar class="" color="grey darken-1" size="52">
-              <img alt="Avatar" src="https://avatars0.githubusercontent.com/u/9064066?v=4&s=460">
+              <img alt="Avatar" :src= getAvatarProfil.photo_url>
             </v-avatar>
           </v-col>
           <v-col cols="7" md="6">
-            <div class="Text_profile "> Mon Profile </div>
+            <div class="Text_profile "> {{ user.prenom}} </div>
           </v-col>
           <v-col cols="1" md="2">
-            <v-btn text icon color="red lighten-2">
+                <v-menu offset-y>
+              <template v-slot:activator="{ on, attrs }">
+            <v-btn v-on="on"  v-bind="attrs" text icon color="red lighten-2">
               <v-icon color="white"> mdi-dots-vertical </v-icon>
             </v-btn>
+              </template>
+              <v-list>
+        <v-list-item
+          v-for="(item, index) in listMenu"
+          :key="index"
+          @click="menuActionClick(item.action)"
+        >
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+                </v-menu>
           </v-col>
         </v-row>
       </v-sheet>
 
-      <v-list three-line>
-        <template v-for="(item, index) in items">
-          <v-subheader v-if="item.header" :key="item.header" v-text="item.header"></v-subheader>
-
-          <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>
-
-          <v-list-item v-else :key="item.title">
+      <v-list >
+        <template v-for="(item) in items">
+          <v-list-item  :key="item.title">
             <v-list-item-avatar>
               <v-img :src="item.avatar"></v-img>
             </v-list-item-avatar>
@@ -91,13 +100,44 @@
 </template>
 
 <script>
+import Vue from 'vue'
+import { mapGetters } from 'vuex'
+import axios from 'axios'
+import VueSocketIOExt from 'vue-socket.io-extended'
+import io from 'socket.io-client'
+Vue.config.productionTip = false
+
+const socketConnection = io('http://localhost:8000')
+
+Vue.use(VueSocketIOExt, socketConnection)
 export default {
   async created () {
+    await this.getUser()
     await this.idLaunch()
     await this.setUserName()
     await this.full()
   },
+  computed: {
+    getAvatarProfil () {
+      const user = this.user.photo_utilisateur.find(photo => photo.est_photo_profil === true)
+      return user
+    },
+    ...mapGetters(['user_Id'])
+  },
   methods: {
+    menuActionClick (action) {
+      if (action === 'test') {
+        alert('TEST!!')
+      } else if (action === 'logout') {
+        alert('LOGOUT!!')
+      }
+    },
+    getUser () {
+      axios.get(`http://localhost:8000/utilisateurs/${this.user_Id}`)
+        .then((res) => {
+          this.user = res.data
+        })
+    },
     ifIdTrue (data) {
       if (data === this.id) {
         return true
@@ -116,7 +156,7 @@ export default {
       this.inputMessages = ''
     },
     idLaunch () {
-      this.$socket.client.emit('idLaunch')
+      this.$socket.client.emit('idLaunch', this.user_Id)
     },
     setUserName () {
       this.$socket.client.emit('join', this.id)
@@ -157,17 +197,9 @@ export default {
       subtitle: '<span class="text--primary">Ali Connors</span> &mdash; I\'ll be in your neighborhood doing errands this weekend. Do you want to hang out?'
     },
     {
-      divider: true,
-      inset: true
-    },
-    {
       avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
       title: 'Summer BBQ <span class="grey--text text--lighten-1">4</span>',
       subtitle: '<span class="text--primary">to Alex, Scott, Jennifer</span> &mdash; Wish I could come, but I\'m out of town this weekend.'
-    },
-    {
-      divider: true,
-      inset: true
     },
     {
       avatar: 'https://cdn.vuetifyjs.com/images/lists/3.jpg',
@@ -175,17 +207,9 @@ export default {
       subtitle: '<span class="text--primary">Sandra Adams</span> &mdash; Do you have Paris recommendations? Have you ever been?'
     },
     {
-      divider: true,
-      inset: true
-    },
-    {
       avatar: 'https://cdn.vuetifyjs.com/images/lists/4.jpg',
       title: 'Birthday gift',
       subtitle: '<span class="text--primary">Trevor Hansen</span> &mdash; Have any ideas about what we should get Heidi for her birthday?'
-    },
-    {
-      divider: true,
-      inset: true
     },
     {
       avatar: 'https://cdn.vuetifyjs.com/images/lists/5.jpg',
@@ -195,9 +219,14 @@ export default {
     ],
     drawer: null,
     img: 'https://cdn.vuetifyjs.com/images/lists/5.jpg',
-    user: 'Furry',
-    time: '1 day ago'
-  })
+    time: '1 day ago',
+    user: {},
+    listMenu: [
+      { title: 'Mon compte', actions: 'Mon compte' },
+      { title: 'Déconnexion', actions: 'deconnexion' }
+    ]
+  }
+  )
 }
 
 </script>
