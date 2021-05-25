@@ -3,13 +3,13 @@
     <h2>Personnalise ton profil et trouves des personnes te correspondant le plus !</h2>
     <div v-for="question in questions_reponses" :key="question.id">
       <div v-show="question.id === index_question_courante">
-        <p class="text-question">{{question.message}}</p>
+        <p class="text-question">Question n°{{index_question_courante}} sur {{liste_questions.length}} - {{question.message}}</p>
           <v-radio-group
             v-model="reponse_utilisateur[question.id]"
             row
             v-on:change="showBoutonSuivant(question.id)"
           >
-            <v-radio v-for="reponse in question.reponses" :key="reponse.id"
+            <v-radio class="reponse" v-for="reponse in question.reponses" :key="reponse.id"
               v-bind:label="reponse.message_reponse"
             ></v-radio>
          </v-radio-group>
@@ -21,13 +21,22 @@
             color="#F06292"
             :style="{left: '50%', transform:'translateX(-50%)'}"
             >
-              Question suivante
+              <div v-if="index_question_courante === questions_reponses.length">Terminer le quizz</div>
+              <div v-else>Question suivante</div>
           </v-btn>
         </div>
       </div>
     </div>
     <div v-show="index_question_courante === questions_reponses.length+1">
-      <h2>Quizz terminé</h2>
+      <div class="text-question">Quizz terminé</div>
+      <v-btn
+        align-center
+        justify-center
+        color="#F06292"
+        :style="{left: '50%', transform:'translateX(-50%)', marginTop: '20px'}"
+      >
+        Se connecter
+      </v-btn>
     </div>
   </div>
 </template>
@@ -106,4 +115,26 @@ h3, h2 {
   font-size: 20px;
 }
 
+.reponse {
+  background-color: white;
+  margin-left: 10px;
+  margin-right: 10px;
+  height: 50px;
+  flex: 1;
+  border: 1px solid grey;
+}
+
+.v-item--active {
+  border: 5px solid #0984e3;
+}
+
+</style>
+
+<style>
+.theme--light.v-label {
+  color:black !important;
+}
+.v-input--selection-controls__ripple {
+  visibility: hidden;
+}
 </style>
