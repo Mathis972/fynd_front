@@ -10,7 +10,7 @@
             v-on:change="showBoutonSuivant(question.id)"
           >
             <v-radio class="reponse" v-for="reponse in question.reponses" :key="reponse.id"
-              v-bind:label="reponse.message_reponse"
+              v-bind:label="reponse.message_reponse" :value="reponse.id"
             ></v-radio>
          </v-radio-group>
         <div v-show="boutonSuivant">
@@ -42,22 +42,13 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'QuestionsQuizz',
   data () {
     return {
-      liste_questions: [
-        { id: 1, message: 'Quel est ton sport préféré ?' },
-        { id: 2, message: 'Quelle est ta couleur préférée ?' }
-      ],
-      liste_reponses: [
-        { id: 1, id_question: 1, message_reponse: 'Football', icon: '' },
-        { id: 2, id_question: 1, message_reponse: 'Handball', icon: '' },
-        { id: 3, id_question: 1, message_reponse: 'Rugby', icon: '' },
-        { id: 4, id_question: 1, message_reponse: 'Athlétisme', icon: '' },
-        { id: 5, id_question: 2, message_reponse: 'Vert', icon: '' },
-        { id: 6, id_question: 2, message_reponse: 'Rouge', icon: '' }
-      ],
+      liste_questions: [],
+      liste_reponses: [],
       questions_reponses: [],
       index_question_courante: 1,
       reponse_utilisateur: [],
@@ -65,11 +56,19 @@ export default {
       boutonAffiche: false
     }
   },
-  mounted () {
+  async mounted () {
+    await axios.get('http://localhost:8000/questions')
+      .then(res => {
+        res.data.forEach(question => this.liste_questions.push(question))
+      })
+    await axios.get('http://localhost:8000/reponses')
+      .then(res => {
+        res.data.forEach(reponse => this.liste_reponses.push(reponse))
+      })
     const questionReponses = []
     this.liste_questions.forEach(question => {
       const reponses = this.liste_reponses.filter(reponse => {
-        if (reponse.id_question === question.id) {
+        if (reponse.fk_question_id === question.id) {
           return reponse
         }
       })
@@ -79,13 +78,14 @@ export default {
   },
   methods: {
     next: function () {
+      if (this.index_question_courante === this.questions_reponses.length) {
+        axios.post('http://localhost:8000/reponses_utilisateurs', { reponses_utilisateur: this.reponse_utilisateur })
+      }
       this.index_question_courante++
       this.boutonSuivant = false
     },
     showBoutonSuivant: function (questionId) {
-      console.log('click')
       if (!this.boutonSuivant) {
-        console.log('cond')
         this.boutonSuivant = true
       }
     }
