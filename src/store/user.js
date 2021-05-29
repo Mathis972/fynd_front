@@ -9,7 +9,7 @@ export default {
     isLogged: false,
     token: undefined,
     userLoading: false,
-    userId: undefined
+    userId: localStorage.getItem('utilisateur') || undefined
   },
   getters: {
     user_token: function (state) {
@@ -47,13 +47,20 @@ export default {
           console.log(r)
           commit('SET_USER_LOADING', false)
           if (r.status === 200) {
+            localStorage.setItem('token', r.data.token)
+            localStorage.setItem('utilisateur', JSON.stringify(r.data.userId))
             commit('SET_TOKEN', r.data.token)
             commit('SET_USER_ID', r.data.userId)
             commit('SET_IS_LOGGED', true)
             returnValue = { error: false }
+          } else {
+            localStorage.removeItem('token')
+            localStorage.removeItem('utilisateur')
           }
         })
         .catch(function (e) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('utilisateur')
           commit('SET_USER_LOADING', false)
           returnValue = { error: true, message: e.response.data.message }
         })

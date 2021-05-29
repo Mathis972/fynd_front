@@ -1,12 +1,12 @@
 <template>
-  <v-app id="inspire">
+  <v-app id="inspire" v-if="conversations">
     <v-app-bar app clipped-right flat height="72" color=" rgba(0, 0, 0, 0.87)">
       <div style="display:flex" align="center">
         <v-avatar class="" color="grey darken-1" size="52">
-          <img alt="Avatar" :src=getAvatarProfil>
+          <img alt="Avatar" :src="userTalk.photo" >
         </v-avatar>
         <div class="info" style="display:grid;margin-left:15px;">
-          <span class="user">{{ user.prenom }}</span>
+          <span class="user">{{ userTalk.prenom }}</span>
           <span class="time">{{ time }}</span>
         </div>
       </div>
@@ -17,7 +17,7 @@
         <v-row class="content-profile" align="center" justify="center">
           <v-col cols="4" md="4">
             <v-avatar class="" color="grey darken-1" size="52">
-              <img alt="Avatar" :src= getAvatarProfil.photo_url>
+              <img alt="Avatar" :src="getAvatarProfil.photo_url">
             </v-avatar>
           </v-col>
           <v-col cols="7" md="6">
@@ -34,7 +34,7 @@
         <v-list-item
           v-for="(item, index) in listMenu"
           :key="index"
-          @click="menuActionClick(item.action)"
+          @click="menuActionClick(item)"
         >
           <v-list-item-title>{{ item.title }}</v-list-item-title>
         </v-list-item>
@@ -45,18 +45,26 @@
       </v-sheet>
 
       <v-list >
-        <template v-for="(item) in items">
-          <v-list-item  :key="item.title">
+        <v-subheader class="titre-conversation" >Mes amis sauvegardées </v-subheader>
+        <v-divider ></v-divider>
+        <template v-if="conversations.length > 0">
+        <template  v-for="(conversationsListe) in conversations">
+          <v-divider :key="conversationsListe.prenom"></v-divider>
+          <v-list-item
+          @click="connectToRoom(conversationsListe)"
+          :key="conversationsListe.prenom">
             <v-list-item-avatar>
-              <v-img :src="item.avatar"></v-img>
+              <v-img :src="conversationsListe.photo.photo_url"></v-img>
             </v-list-item-avatar>
 
             <v-list-item-content>
-              <v-list-item-title v-html="item.title"></v-list-item-title>
-              <v-list-item-subtitle v-html="item.subtitle"></v-list-item-subtitle>
+              <v-list-item-title  v-html="conversationsListe.prenom"></v-list-item-title>
+              <v-list-item-subtitle  v-if="conversationsListe.messages"  v-html="conversationsListe.messages.contenu"  ></v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </template>
+        </template>
+        <template v-else class="Pas_Amis" > <div><p class="Pas_Amis">Aucun amis.. </p></div> </template>
       </v-list>
     </v-navigation-drawer>
 
@@ -66,18 +74,18 @@
           john doe
         </v-card-title>
         <v-card-text class="flex-grow-1 overflow-y-auto">
-          <template v-for="(msg) in messages">
+          <template v-for="(msg) in messages"  >
 
-            <div :class="{'d-flex flex-row-reverse' : ifIdTrue(msg.me) }">
-              <v-avatar v-if="!ifIdTrue(msg.me)" class="ma-4" color="grey darken-1" size="52">
+            <div :class="{'d-flex flex-row-reverse' : msg.send_by_user }">
+              <!-- <v-avatar v-if="!ifIdTrue(msg.me)" class="ma-4" color="grey darken-1" size="52">
                 <img alt="Avatar" :src= msg.src >
-              </v-avatar>
+              </v-avatar> -->
                 <template >
 
-                  <v-chip :color="ifIdTrue(msg.me) ? '#7626DE' : 'grey darken-1'" dark style="height:auto;white-space: normal;"
+                  <v-chip :color=" msg.send_by_user ? '#7626DE' : 'grey darken-1'" dark style="height:auto;white-space: normal;"
                     class="pa-4 mb-2" >
-                    {{ msg.content }}
-                    <sub class="ml-2" style="font-size: 0.5rem;">{{ msg.created_at }}</sub>
+                    {{ msg.contenu }}
+                    <sub class="ml-2" style="font-size: 0.5rem;">{{  }}</sub>
                   </v-chip>
                 </template>
                 <v-list>
@@ -116,43 +124,112 @@ export default {
     await this.idLaunch()
     await this.setUserName()
     await this.full()
+    await this.recupConv()
+    // await this.getAvatarProfil()
   },
   computed: {
     getAvatarProfil () {
-      const user = this.user.photo_utilisateur.find(photo => photo.est_photo_profil === true)
-      return user
+      if (!this.user) {
+        return ''
+      } else {
+        // console.log(this.user)
+        const user = this.user.photo_utilisateur.find(photo => photo.est_photo_profil === true)
+        return user
+      }
     },
     ...mapGetters(['user_Id'])
   },
   methods: {
-    menuActionClick (action) {
-      if (action === 'test') {
-        alert('TEST!!')
-      } else if (action === 'logout') {
-        alert('LOGOUT!!')
-      }
+    // methode qui permet de recup les conversation
+    async recupConv () {
+      const recup = await axios.get(`http://localhost:8000/conversations/utilisateur/${this.user_Id}`)
+        .then((r) => {
+          this.conversations = r.data.reduce((acc, curr) => {
+            if (curr.fk_utilisateur1_id !== JSON.parse(this.user_Id)) {
+              if (curr.message.length > 0) {
+                acc.push({
+                  est_user_1: true,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur1_id,
+                  photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateurs1.prenom,
+                  messages: curr.message.reduce((a, b) => {
+                    return new Date(a.created_date) > new Date(b.created_date) ? a : b
+                  })
+                })
+              } else {
+                acc.push({
+                  est_user_1: true,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur1_id,
+                  photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateurs1.prenom,
+                  messages: ''
+                })
+              }
+            } else {
+              if (curr.message.length > 0) {
+                acc.push({
+                  est_user_1: false,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur2_id,
+                  photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateur2.prenom,
+                  messages: curr.message.reduce((a, b) => {
+                    return new Date(a.created_date) > new Date(b.created_date) ? a : b
+                  })
+                })
+              } else {
+                acc.push({
+                  est_user_1: false,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur2_id,
+                  photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateur2.prenom,
+                  messages: ''
+                })
+              }
+            }
+            return acc
+          }, [])
+        })
+      return recup
     },
     getUser () {
-      axios.get(`http://localhost:8000/utilisateurs/${this.user_Id}`)
+      const user = axios.get(`http://localhost:8000/utilisateurs/${this.user_Id}`)
         .then((res) => {
           this.user = res.data
         })
+      return user
     },
-    ifIdTrue (data) {
-      if (data === this.id) {
-        return true
-      } else {
-        return false
+    dateCalcul (date) {
+      return Date.parse(new Date(date))
+    },
+    connectToRoom (utilisateur) {
+      console.log(utilisateur)
+      this.conversations_id = utilisateur.conversations_id
+      this.userTalk = {
+        est_user_1: utilisateur.est_user_1,
+        prenom: utilisateur.prenom,
+        photo: utilisateur.photo.photo_url,
+        id: utilisateur.id
       }
+      this.$socket.client.emit('joinRoom', utilisateur.conversations_id)
     },
-    sendMessage () {
-      this.$socket.client.emit('message', {
-        content: this.inputMessages,
-        me: this.id,
-        created_at: `${this.timeHours.getHours()}: ${this.timeHours.getMinutes()}`,
-        src: 'https://cdn.vuetifyjs.com/images/lists/5.jpg'
-
-      }) // send the content of the message bar to the server
+    async sendMessage () {
+      let message = {
+        contenu: this.inputMessages,
+        send_by_user1: this.userTalk.est_user_1,
+        fk_conversation_id: this.conversations_id
+      }
+      console.log(message)
+      await axios.post('http://localhost:8000/messages', message)
+        .then((r) => {
+          this.$socket.client.emit('message', message)
+          console.log('fait')
+        })
+      message = ''
+      // send the content of the message bar to the server
       this.inputMessages = ''
     },
     idLaunch () {
@@ -183,44 +260,19 @@ export default {
     }
   },
   data: () => ({
+    userTalk: {},
     timeHours: new Date(),
+    photoProfilUser: {},
     id: '',
     inputMessages: '',
     messages: [
     ],
-    items: [{
-      header: 'Today'
-    },
-    {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-      title: 'Brunch this weekend?',
-      subtitle: '<span class="text--primary">Ali Connors</span> &mdash; I\'ll be in your neighborhood doing errands this weekend. Do you want to hang out?'
-    },
-    {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
-      title: 'Summer BBQ <span class="grey--text text--lighten-1">4</span>',
-      subtitle: '<span class="text--primary">to Alex, Scott, Jennifer</span> &mdash; Wish I could come, but I\'m out of town this weekend.'
-    },
-    {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/3.jpg',
-      title: 'Oui oui',
-      subtitle: '<span class="text--primary">Sandra Adams</span> &mdash; Do you have Paris recommendations? Have you ever been?'
-    },
-    {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/4.jpg',
-      title: 'Birthday gift',
-      subtitle: '<span class="text--primary">Trevor Hansen</span> &mdash; Have any ideas about what we should get Heidi for her birthday?'
-    },
-    {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/5.jpg',
-      title: 'Recipe to try',
-      subtitle: '<span class="text--primary">Britta Holt</span> &mdash; We should eat this: Grate, Squash, Corn, and tomatillo Tacos.'
-    }
-    ],
+    conversations_id: undefined,
+    conversations: undefined,
     drawer: null,
     img: 'https://cdn.vuetifyjs.com/images/lists/5.jpg',
     time: '1 day ago',
-    user: {},
+    user: undefined,
     listMenu: [
       { title: 'Mon compte', actions: 'Mon compte' },
       { title: 'Déconnexion', actions: 'deconnexion' }
@@ -248,6 +300,13 @@ export default {
   .v-application .info {
     background-color: #f5f5f5 !important;
     border-color: #f5f5f5 !important;
+  }
+  .titre-conversation {
+    font-size: 15px;
+    font-weight: bold;
+  }
+  .Pas_Amis{
+   font-size: 20px;
   }
 
 </style>
