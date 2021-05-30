@@ -76,13 +76,13 @@
         <v-card-text class="flex-grow-1 overflow-y-auto">
           <template v-for="(msg) in messages"  >
 
-            <div :class="{'d-flex flex-row-reverse' : msg.send_by_user }">
+            <div :class="{'d-flex flex-row-reverse' : msg.send_by_user1 }">
               <!-- <v-avatar v-if="!ifIdTrue(msg.me)" class="ma-4" color="grey darken-1" size="52">
                 <img alt="Avatar" :src= msg.src >
               </v-avatar> -->
                 <template >
 
-                  <v-chip :color=" msg.send_by_user ? '#7626DE' : 'grey darken-1'" dark style="height:auto;white-space: normal;"
+                  <v-chip :color=" msg.send_by_user1 ? '#7626DE' : 'grey darken-1'" dark style="height:auto;white-space: normal;"
                     class="pa-4 mb-2" >
                     {{ msg.contenu }}
                     <sub class="ml-2" style="font-size: 0.5rem;">{{  }}</sub>
@@ -227,6 +227,8 @@ export default {
         .then((r) => {
           this.$socket.client.emit('message', message)
           console.log('fait')
+        }).catch((value) => {
+          console.log(value)
         })
       message = ''
       // send the content of the message bar to the server
