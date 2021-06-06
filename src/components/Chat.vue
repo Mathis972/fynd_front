@@ -1,13 +1,13 @@
 <template>
-  <v-app id="inspire">
+  <v-app id="inspire" v-if="conversations">
     <v-app-bar app clipped-right flat height="72" color=" rgba(0, 0, 0, 0.87)">
       <div style="display:flex" align="center">
         <v-avatar class="" color="grey darken-1" size="52">
-          <img alt="Avatar" :src=img>
+          <img alt="Avatar" :src="userTalk.photo" >
         </v-avatar>
         <div class="info" style="display:grid;margin-left:15px;">
-          <span class="user">{{ user }}</span>
-          <span class="time">{{ time }}</span>
+          <span class="user">{{ userTalk.prenom }}</span>
+          <!-- <span class="time">{{ time }}</span> -->
         </div>
       </div>
     </v-app-bar>
@@ -17,37 +17,54 @@
         <v-row class="content-profile" align="center" justify="center">
           <v-col cols="4" md="4">
             <v-avatar class="" color="grey darken-1" size="52">
-              <img alt="Avatar" src="https://avatars0.githubusercontent.com/u/9064066?v=4&s=460">
+              <img alt="Avatar"  :src="getAvatarProfil.photo_url">
             </v-avatar>
           </v-col>
           <v-col cols="7" md="6">
-            <div class="Text_profile "> Mon Profile </div>
+            <div class="Text_profile "> {{ user.prenom}} </div>
           </v-col>
           <v-col cols="1" md="2">
-            <v-btn text icon color="red lighten-2">
+                <v-menu offset-y>
+              <template v-slot:activator="{ on, attrs }">
+            <v-btn v-on="on"  v-bind="attrs" text icon color="red lighten-2">
               <v-icon color="white"> mdi-dots-vertical </v-icon>
             </v-btn>
+              </template>
+              <v-list>
+        <v-list-item
+          v-for="(item, index) in listMenu"
+          :key="index"
+          @click="menuActionClick(item.action)"
+        >
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+                </v-menu>
           </v-col>
         </v-row>
       </v-sheet>
 
-      <v-list three-line>
-        <template v-for="(item, index) in items">
-          <v-subheader v-if="item.header" :key="item.header" v-text="item.header"></v-subheader>
-
-          <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>
-
-          <v-list-item v-else :key="item.title">
+      <v-list >
+        <v-subheader class="titre-conversation" >Mes amis sauvegardées </v-subheader>
+        <v-divider ></v-divider>
+        <template v-if="conversations.length > 0">
+        <template  v-for="(conversationsListe) in conversations">
+          <v-divider :key="conversationsListe.conversations_id"></v-divider>
+          <v-list-item
+          @click="connectToRoom(conversationsListe)"
+          :key="conversationsListe.prenom">
             <v-list-item-avatar>
-              <v-img :src="item.avatar"></v-img>
+              <v-img :src="conversationsListe.photo.photo_url"></v-img>
             </v-list-item-avatar>
 
             <v-list-item-content>
-              <v-list-item-title v-html="item.title"></v-list-item-title>
-              <v-list-item-subtitle v-html="item.subtitle"></v-list-item-subtitle>
+              <v-list-item-title  v-html="conversationsListe.prenom"></v-list-item-title>
+              <v-list-item-subtitle  v-if="conversationsListe.messages"  v-html="conversationsListe.messages.contenu"  ></v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </template>
+        </template>
+        <template v-else class="Pas_Amis" > <div><p class="Pas_Amis">Aucun amis.. </p></div> </template>
       </v-list>
     </v-navigation-drawer>
 
@@ -57,18 +74,18 @@
           john doe
         </v-card-title>
         <v-card-text class="flex-grow-1 overflow-y-auto">
-          <template v-for="(msg) in messages">
+          <template v-for="(msg) in messages"  >
 
-            <div :class="{'d-flex flex-row-reverse' : ifIdTrue(msg.me) }">
-              <v-avatar v-if="!ifIdTrue(msg.me)" class="ma-4" color="grey darken-1" size="52">
-                <img alt="Avatar" :src= msg.src >
+            <div :class="{'d-flex flex-row-reverse' :  checkUser(msg) }">
+              <v-avatar v-if="!checkUser(msg)" class="ma-4" color="grey darken-1" size="52">
+                <img alt="Avatar" :src= userTalk.photo >
               </v-avatar>
                 <template >
 
-                  <v-chip :color="ifIdTrue(msg.me) ? '#7626DE' : 'grey darken-1'" dark style="height:auto;white-space: normal;"
+                  <v-chip :color=" checkUser(msg) ? '#7626DE' : 'grey darken-1'" dark style="height:auto;white-space: normal;"
                     class="pa-4 mb-2" >
-                    {{ msg.content }}
-                    <sub class="ml-2" style="font-size: 0.5rem;">{{ msg.created_at }}</sub>
+                    {{ msg.contenu }}
+                    <sub class="ml-2" style="font-size: 0.5rem;">{{  }}</sub>
                   </v-chip>
                 </template>
                 <v-list>
@@ -91,39 +108,158 @@
 </template>
 
 <script>
+import Vue from 'vue'
+import { mapGetters } from 'vuex'
+import axios from 'axios'
+import VueSocketIOExt from 'vue-socket.io-extended'
+import io from 'socket.io-client'
+Vue.config.productionTip = false
+
+const socketConnection = io('http://localhost:8000')
+
+Vue.use(VueSocketIOExt, socketConnection)
 export default {
   async created () {
+    await this.getUser()
     await this.idLaunch()
-    await this.setUserName()
-    await this.full()
+    // await this.setUserName()
+    // await this.full()
+    await this.recupConv()
+    // await this.getAvatarProfil()
+  },
+  computed: {
+    getAvatarProfil () {
+      if (!this.user) {
+        return ''
+      } else {
+        // console.log(this.user)
+        const user = this.user.photo_utilisateur.find(photo => photo.est_photo_profil === true)
+        return user
+      }
+    },
+    ...mapGetters(['user_Id'])
   },
   methods: {
-    ifIdTrue (data) {
-      if (data === this.id) {
+    menuActionClick (action) {
+      if (action === 'Mon Compte') {
+        alert('TEST!!')
+      } else if (action === 'deconnexion') {
+        this.$store.dispatch('logOut')
+        this.$router.push({ name: 'Connexion' })
+      }
+    },
+    checkUser (data) {
+      console.log(data)
+      if ((data.conversation.fk_utilisateur1_id === parseInt(this.user_Id) && data.send_by_user1 && !this.userTalk.est_user_1) || (data.conversation.fk_utilisateur2_id === parseInt(this.user_Id) && !data.send_by_user1 && this.userTalk.est_user_1)) {
+        console.log('true')
         return true
       } else {
+        console.log('false')
+        console.log(data.conversation.fk_utilisateur1_id, this.user_Id, data.send_by_user1, this.userTalk.est_user_1)
         return false
       }
     },
-    sendMessage () {
-      this.$socket.client.emit('message', {
-        content: this.inputMessages,
-        me: this.id,
-        created_at: `${this.timeHours.getHours()}: ${this.timeHours.getMinutes()}`,
-        src: 'https://cdn.vuetifyjs.com/images/lists/5.jpg'
-
-      }) // send the content of the message bar to the server
+    // methode qui permet de recup les conversation
+    async recupConv () {
+      const recup = await axios.get(`http://localhost:8000/conversations/utilisateur/${this.user_Id}`)
+        .then((r) => {
+          this.conversations = r.data.reduce((acc, curr) => {
+            if (curr.fk_utilisateur1_id !== JSON.parse(this.user_Id)) {
+              if (curr.message.length > 0) {
+                acc.push({
+                  est_user_1: true,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur1_id,
+                  photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateurs1.prenom,
+                  messages: curr.message.reduce((a, b) => {
+                    return new Date(a.created_date) > new Date(b.created_date) ? a : b
+                  })
+                })
+              } else {
+                acc.push({
+                  est_user_1: true,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur1_id,
+                  photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateurs1.prenom,
+                  messages: ''
+                })
+              }
+            } else {
+              if (curr.message.length > 0) {
+                acc.push({
+                  est_user_1: false,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur2_id,
+                  photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateur2.prenom,
+                  messages: curr.message.reduce((a, b) => {
+                    return new Date(a.created_date) > new Date(b.created_date) ? a : b
+                  })
+                })
+              } else {
+                acc.push({
+                  est_user_1: false,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur2_id,
+                  photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateur2.prenom,
+                  messages: ''
+                })
+              }
+            }
+            return acc
+          }, [])
+        })
+      return recup
+    },
+    getUser () {
+      const user = axios.get(`http://localhost:8000/utilisateurs/${this.user_Id}`)
+        .then((res) => {
+          this.user = res.data
+        })
+      return user
+    },
+    connectToRoom (utilisateur) {
+      console.log(utilisateur)
+      this.conversations_id = utilisateur.conversations_id
+      this.userTalk = {
+        est_user_1: utilisateur.est_user_1,
+        prenom: utilisateur.prenom,
+        photo: utilisateur.photo.photo_url,
+        id: utilisateur.id
+      }
+      this.$socket.client.emit('joinRoom', utilisateur.conversations_id)
+    },
+    async sendMessage () {
+      let message = {
+        contenu: this.inputMessages,
+        send_by_user1: !this.userTalk.est_user_1,
+        fk_conversation_id: this.conversations_id
+      }
+      console.log(message)
+      await axios.post('http://localhost:8000/messages', message)
+        .then((r) => {
+        // console.log(r)
+          this.$socket.client.emit('message', r.data)
+          console.log('fait')
+        }).catch((value) => {
+          console.log(value)
+        })
+      message = ''
+      // send the content of the message bar to the server
       this.inputMessages = ''
     },
     idLaunch () {
-      this.$socket.client.emit('idLaunch')
-    },
-    setUserName () {
-      this.$socket.client.emit('join', this.id)
-    },
-    full () {
-      this.$socket.client.emit('full')
+      this.$socket.client.emit('idLaunch', this.user_Id)
     }
+    // setUserName () {
+    //   this.$socket.client.emit('join', this.id)
+    // }
+    // full () {
+    //   this.$socket.client.emit('full')
+    // }
   },
   sockets: {
     connect () {
@@ -132,72 +268,34 @@ export default {
     message (data) {
       console.log(data)
       this.messages.push(data)
-    },
-    id (data) {
-      this.id = data
-      console.log(data)
-    },
-    full (data) {
-      console.log('tu es kick')
-      this.$socket.leave('room1')
     }
+    // id (data) {
+    //   this.id = data
+    //   console.log(data)
+    // }
+    // full (data) {
+    //   console.log('tu es kick')
+    //   this.$socket.leave('room1')
+    // }
   },
   data: () => ({
+    userTalk: {},
     timeHours: new Date(),
+    photoProfilUser: {},
     id: '',
     inputMessages: '',
     messages: [
     ],
-    items: [{
-      header: 'Today'
-    },
-    {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-      title: 'Brunch this weekend?',
-      subtitle: '<span class="text--primary">Ali Connors</span> &mdash; I\'ll be in your neighborhood doing errands this weekend. Do you want to hang out?'
-    },
-    {
-      divider: true,
-      inset: true
-    },
-    {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
-      title: 'Summer BBQ <span class="grey--text text--lighten-1">4</span>',
-      subtitle: '<span class="text--primary">to Alex, Scott, Jennifer</span> &mdash; Wish I could come, but I\'m out of town this weekend.'
-    },
-    {
-      divider: true,
-      inset: true
-    },
-    {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/3.jpg',
-      title: 'Oui oui',
-      subtitle: '<span class="text--primary">Sandra Adams</span> &mdash; Do you have Paris recommendations? Have you ever been?'
-    },
-    {
-      divider: true,
-      inset: true
-    },
-    {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/4.jpg',
-      title: 'Birthday gift',
-      subtitle: '<span class="text--primary">Trevor Hansen</span> &mdash; Have any ideas about what we should get Heidi for her birthday?'
-    },
-    {
-      divider: true,
-      inset: true
-    },
-    {
-      avatar: 'https://cdn.vuetifyjs.com/images/lists/5.jpg',
-      title: 'Recipe to try',
-      subtitle: '<span class="text--primary">Britta Holt</span> &mdash; We should eat this: Grate, Squash, Corn, and tomatillo Tacos.'
-    }
-    ],
+    conversations_id: undefined,
+    conversations: undefined,
     drawer: null,
-    img: 'https://cdn.vuetifyjs.com/images/lists/5.jpg',
-    user: 'Furry',
-    time: '1 day ago'
-  })
+    user: undefined,
+    listMenu: [
+      { title: 'Mon compte', action: 'Mon compte' },
+      { title: 'Déconnexion', action: 'deconnexion' }
+    ]
+  }
+  )
 }
 
 </script>
@@ -219,6 +317,13 @@ export default {
   .v-application .info {
     background-color: #f5f5f5 !important;
     border-color: #f5f5f5 !important;
+  }
+  .titre-conversation {
+    font-size: 15px;
+    font-weight: bold;
+  }
+  .Pas_Amis{
+   font-size: 20px;
   }
 
 </style>

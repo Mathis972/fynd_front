@@ -27,7 +27,7 @@
                 ></v-text-field>
 
                 <v-text-field
-                  v-model="password"
+                  v-model="mot_de_passe"
                   label="Mot de passe"
                   required
                   color="#FFFFFF"
@@ -35,7 +35,7 @@
                 ></v-text-field>
 
                 <v-btn
-                  @click="login"
+                  @click="submitLogin"
                   color="#F06292"
                   :style="{left: '50%', transform:'translateX(-50%)'}"
                 >
@@ -96,6 +96,30 @@
 
 <script>
 export default {
+  methods: {
+    submitLogin: async function () {
+      this.error = undefined
+      const response = await this.$store.dispatch('logIn', {
+        email: this.email,
+        mot_de_passe: this.mot_de_passe
+      })
+      console.log(response.error)
+      if (response.error === false) {
+        this.$router.push({ name: 'Chat' })
+      } else {
+        this.error = response.message
+      }
+    }
+
+  },
+  data () {
+    return {
+      email: undefined,
+      mot_de_passe: undefined,
+      keep_token: true,
+      error: undefined
+    }
+  },
   name: 'HelloWorld'
 }
 </script>
