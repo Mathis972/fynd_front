@@ -105,7 +105,7 @@ export default {
       })
       console.log(response.error)
       if (response.error === false) {
-        this.$router.push('/')
+        this.$router.push({ name: 'Chat' })
       } else {
         this.error = response.message
       }

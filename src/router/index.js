@@ -1,21 +1,25 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import store from '../store/user'
-import Connexion from '../views/Connexion.vue'
+// import Connexion from '../views/Connexion.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/Connexion',
-    name: 'Connexion',
-    component: Connexion
-  },
-  {
     path: '/',
     name: 'Chat',
+    meta: {
+      requiresAuth: true
+    },
     component: () => import(/* webpackChunkName: "about" */ '../views/PageMessage.vue')
+  },
+  {
+    component: () => import(/* webpackChunkName: "about" */ '../views/Connexion.vue'),
+    path: '/Connexion',
+    name: 'Connexion'
   }
+
 ]
 
 const router = new VueRouter({
@@ -26,15 +30,20 @@ const router = new VueRouter({
 })
 // const listRoutes = ['Connexion']
 
-// router.beforeEach((to, from, next) => {
-//   if (listRoutes.indexOf(to.name) > -1) {
-//     next()
-//   } else {
-//     if (store.getters.is_logged === true) {
-//       next()
-//     } else {
-//       next({ name: 'Connexion' })
-//     }
-//   }
-// })
+router.beforeEach((to, from, next) => {
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    // this route requires auth, check if logged in
+    // if not, redirect to login page.
+    if (!store.state.isLogged) {
+      console.log('yo')
+      next('/Connexion')
+    } else {
+      console.log('yo2')
+      next() // go to wherever I'm going
+    }
+  } else {
+    next()
+    // does not require auth, make sure to always call next()!
+  }
+})
 export default router

@@ -7,7 +7,7 @@
         </v-avatar>
         <div class="info" style="display:grid;margin-left:15px;">
           <span class="user">{{ userTalk.prenom }}</span>
-          <span class="time">{{ time }}</span>
+          <!-- <span class="time">{{ time }}</span> -->
         </div>
       </div>
     </v-app-bar>
@@ -17,7 +17,7 @@
         <v-row class="content-profile" align="center" justify="center">
           <v-col cols="4" md="4">
             <v-avatar class="" color="grey darken-1" size="52">
-              <img alt="Avatar" :src="getAvatarProfil.photo_url">
+              <img alt="Avatar"  :src="getAvatarProfil.photo_url">
             </v-avatar>
           </v-col>
           <v-col cols="7" md="6">
@@ -34,7 +34,7 @@
         <v-list-item
           v-for="(item, index) in listMenu"
           :key="index"
-          @click="menuActionClick(item)"
+          @click="menuActionClick(item.action)"
         >
           <v-list-item-title>{{ item.title }}</v-list-item-title>
         </v-list-item>
@@ -49,7 +49,7 @@
         <v-divider ></v-divider>
         <template v-if="conversations.length > 0">
         <template  v-for="(conversationsListe) in conversations">
-          <v-divider :key="conversationsListe.prenom"></v-divider>
+          <v-divider :key="conversationsListe.conversations_id"></v-divider>
           <v-list-item
           @click="connectToRoom(conversationsListe)"
           :key="conversationsListe.prenom">
@@ -76,13 +76,13 @@
         <v-card-text class="flex-grow-1 overflow-y-auto">
           <template v-for="(msg) in messages"  >
 
-            <div :class="{'d-flex flex-row-reverse' : msg.send_by_user1 }">
-              <!-- <v-avatar v-if="!ifIdTrue(msg.me)" class="ma-4" color="grey darken-1" size="52">
-                <img alt="Avatar" :src= msg.src >
-              </v-avatar> -->
+            <div :class="{'d-flex flex-row-reverse' :  checkUser(msg) }">
+              <v-avatar v-if="!checkUser(msg)" class="ma-4" color="grey darken-1" size="52">
+                <img alt="Avatar" :src= userTalk.photo >
+              </v-avatar>
                 <template >
 
-                  <v-chip :color=" msg.send_by_user1 ? '#7626DE' : 'grey darken-1'" dark style="height:auto;white-space: normal;"
+                  <v-chip :color=" checkUser(msg) ? '#7626DE' : 'grey darken-1'" dark style="height:auto;white-space: normal;"
                     class="pa-4 mb-2" >
                     {{ msg.contenu }}
                     <sub class="ml-2" style="font-size: 0.5rem;">{{  }}</sub>
@@ -122,8 +122,8 @@ export default {
   async created () {
     await this.getUser()
     await this.idLaunch()
-    await this.setUserName()
-    await this.full()
+    // await this.setUserName()
+    // await this.full()
     await this.recupConv()
     // await this.getAvatarProfil()
   },
@@ -140,6 +140,25 @@ export default {
     ...mapGetters(['user_Id'])
   },
   methods: {
+    menuActionClick (action) {
+      if (action === 'Mon Compte') {
+        alert('TEST!!')
+      } else if (action === 'deconnexion') {
+        this.$store.dispatch('logOut')
+        this.$router.push({ name: 'Connexion' })
+      }
+    },
+    checkUser (data) {
+      console.log(data)
+      if ((data.conversation.fk_utilisateur1_id === parseInt(this.user_Id) && data.send_by_user1 && !this.userTalk.est_user_1) || (data.conversation.fk_utilisateur2_id === parseInt(this.user_Id) && !data.send_by_user1 && this.userTalk.est_user_1)) {
+        console.log('true')
+        return true
+      } else {
+        console.log('false')
+        console.log(data.conversation.fk_utilisateur1_id, this.user_Id, data.send_by_user1, this.userTalk.est_user_1)
+        return false
+      }
+    },
     // methode qui permet de recup les conversation
     async recupConv () {
       const recup = await axios.get(`http://localhost:8000/conversations/utilisateur/${this.user_Id}`)
@@ -202,9 +221,6 @@ export default {
         })
       return user
     },
-    dateCalcul (date) {
-      return Date.parse(new Date(date))
-    },
     connectToRoom (utilisateur) {
       console.log(utilisateur)
       this.conversations_id = utilisateur.conversations_id
@@ -219,13 +235,14 @@ export default {
     async sendMessage () {
       let message = {
         contenu: this.inputMessages,
-        send_by_user1: this.userTalk.est_user_1,
+        send_by_user1: !this.userTalk.est_user_1,
         fk_conversation_id: this.conversations_id
       }
       console.log(message)
       await axios.post('http://localhost:8000/messages', message)
         .then((r) => {
-          this.$socket.client.emit('message', message)
+        // console.log(r)
+          this.$socket.client.emit('message', r.data)
           console.log('fait')
         }).catch((value) => {
           console.log(value)
@@ -236,13 +253,13 @@ export default {
     },
     idLaunch () {
       this.$socket.client.emit('idLaunch', this.user_Id)
-    },
-    setUserName () {
-      this.$socket.client.emit('join', this.id)
-    },
-    full () {
-      this.$socket.client.emit('full')
     }
+    // setUserName () {
+    //   this.$socket.client.emit('join', this.id)
+    // }
+    // full () {
+    //   this.$socket.client.emit('full')
+    // }
   },
   sockets: {
     connect () {
@@ -251,15 +268,15 @@ export default {
     message (data) {
       console.log(data)
       this.messages.push(data)
-    },
-    id (data) {
-      this.id = data
-      console.log(data)
-    },
-    full (data) {
-      console.log('tu es kick')
-      this.$socket.leave('room1')
     }
+    // id (data) {
+    //   this.id = data
+    //   console.log(data)
+    // }
+    // full (data) {
+    //   console.log('tu es kick')
+    //   this.$socket.leave('room1')
+    // }
   },
   data: () => ({
     userTalk: {},
@@ -272,12 +289,10 @@ export default {
     conversations_id: undefined,
     conversations: undefined,
     drawer: null,
-    img: 'https://cdn.vuetifyjs.com/images/lists/5.jpg',
-    time: '1 day ago',
     user: undefined,
     listMenu: [
-      { title: 'Mon compte', actions: 'Mon compte' },
-      { title: 'Déconnexion', actions: 'deconnexion' }
+      { title: 'Mon compte', action: 'Mon compte' },
+      { title: 'Déconnexion', action: 'deconnexion' }
     ]
   }
   )

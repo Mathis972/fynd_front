@@ -30,10 +30,18 @@ export default {
       state.userLoading = loading
     },
     SET_IS_LOGGED (state, isLogged) {
-      state.is_logged = isLogged
+      state.isLogged = isLogged
     }
   },
   actions: {
+    logOut: async function ({ commit, state }) {
+      commit('SET_TOKEN', '')
+      commit('SET_USER_ID', '')
+      commit('SET_IS_LOGGED', '')
+      localStorage.removeItem('token')
+      localStorage.removeItem('utilisateur')
+    },
+
     logIn: async function ({ commit, state }, data) {
       const payload = {}
       let returnValue
@@ -49,6 +57,7 @@ export default {
           if (r.status === 200) {
             localStorage.setItem('token', r.data.token)
             localStorage.setItem('utilisateur', JSON.stringify(r.data.userId))
+            localStorage.setItem('logged', true)
             commit('SET_TOKEN', r.data.token)
             commit('SET_USER_ID', r.data.userId)
             commit('SET_IS_LOGGED', true)
