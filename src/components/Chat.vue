@@ -1,106 +1,206 @@
 <template>
-  <v-app id="inspire" v-if="conversations">
-    <v-app-bar app clipped-right flat height="72" color=" rgba(0, 0, 0, 0.87)">
-      <div style="display:flex" align="center">
-        <v-avatar class="" color="grey darken-1" size="52">
-          <img alt="Avatar" :src="userTalk.photo" >
+  <v-app
+    id="inspire"
+    v-if="conversations"
+  >
+    <v-app-bar
+      app
+      clipped-right
+      flat
+      height="72"
+      color=" rgba(0, 0, 0, 0.87)"
+    >
+      <div
+        style="display:flex"
+        align="center"
+      >
+        <v-avatar
+          class=""
+          color="grey darken-1"
+          size="52"
+        >
+          <img
+            alt="Avatar"
+            :src="userTalk.photo"
+          >
         </v-avatar>
-        <div class="info" style="display:grid;margin-left:15px;">
+        <div
+          class="info"
+          style="display:grid;margin-left:15px;"
+        >
           <span class="user">{{ userTalk.prenom }}</span>
           <!-- <span class="time">{{ time }}</span> -->
         </div>
       </div>
     </v-app-bar>
 
-    <v-navigation-drawer v-model="drawer" app width="300">
-      <v-sheet color="grey lighten-5" width="100%" class=" sheet">
-        <v-row class="content-profile" align="center" justify="center">
-          <v-col cols="4" md="4">
-            <v-avatar class="" color="grey darken-1" size="52">
-              <img alt="Avatar"  :src="getAvatarProfil.photo_url">
+    <v-navigation-drawer
+      v-model="drawer"
+      app
+      width="300"
+    >
+      <v-sheet
+        color="grey lighten-5"
+        width="100%"
+        class=" sheet"
+      >
+        <v-row
+          class="content-profile"
+          align="center"
+          justify="center"
+        >
+          <v-col
+            cols="4"
+            md="4"
+          >
+            <v-avatar
+              class=""
+              color="grey darken-1"
+              size="52"
+            >
+              <img
+                alt="Avatar"
+                :src="getAvatarProfil.photo_url"
+              >
             </v-avatar>
           </v-col>
-          <v-col cols="7" md="6">
+          <v-col
+            cols="7"
+            md="6"
+          >
             <div class="Text_profile "> {{ user.prenom}} </div>
           </v-col>
-          <v-col cols="1" md="2">
-                <v-menu offset-y>
+          <v-col
+            cols="1"
+            md="2"
+          >
+            <v-menu offset-y>
               <template v-slot:activator="{ on, attrs }">
-            <v-btn v-on="on"  v-bind="attrs" text icon color="red lighten-2">
-              <v-icon color="white"> mdi-dots-vertical </v-icon>
-            </v-btn>
+                <v-btn
+                  v-on="on"
+                  v-bind="attrs"
+                  text
+                  icon
+                  color="red lighten-2"
+                >
+                  <v-icon color="white"> mdi-dots-vertical </v-icon>
+                </v-btn>
               </template>
               <v-list>
-        <v-list-item
-          v-for="(item, index) in listMenu"
-          :key="index"
-          @click="menuActionClick(item.action)"
-        >
-          <v-list-item-title>{{ item.title }}</v-list-item-title>
-        </v-list-item>
-      </v-list>
-                </v-menu>
+                <v-list-item
+                  v-for="(item, index) in listMenu"
+                  :key="index"
+                  @click="menuActionClick(item.action)"
+                >
+                  <v-list-item-title>{{ item.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </v-col>
         </v-row>
       </v-sheet>
 
-      <v-list >
-        <v-subheader class="titre-conversation" >Mes amis sauvegardées </v-subheader>
-        <v-divider ></v-divider>
+      <v-list>
+        <v-subheader class="titre-conversation">Mes amis sauvegardées </v-subheader>
+        <v-divider></v-divider>
         <template v-if="conversations.length > 0">
-        <template  v-for="(conversationsListe) in conversations">
-          <v-divider :key="conversationsListe.conversations_id"></v-divider>
-          <v-list-item
-          @click="connectToRoom(conversationsListe)"
-          :key="conversationsListe.prenom">
-            <v-list-item-avatar>
-              <v-img :src="conversationsListe.photo.photo_url"></v-img>
-            </v-list-item-avatar>
+          <template v-for="(conversationsListe) in conversations">
+            <v-divider :key="conversationsListe.conversations_id"></v-divider>
+            <v-list-item
+              @click="connectToRoom(conversationsListe)"
+              :key="conversationsListe.prenom"
+            >
+              <v-list-item-avatar>
+                <v-img :src="conversationsListe.photo.photo_url"></v-img>
+              </v-list-item-avatar>
 
-            <v-list-item-content>
-              <v-list-item-title  v-html="conversationsListe.prenom"></v-list-item-title>
-              <v-list-item-subtitle  v-if="conversationsListe.messages"  v-html="conversationsListe.messages.contenu"  ></v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
+              <v-list-item-content>
+                <v-list-item-title v-html="conversationsListe.prenom"></v-list-item-title>
+                <v-list-item-subtitle
+                  v-if="conversationsListe.messages"
+                  v-html="conversationsListe.messages.contenu"
+                ></v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
         </template>
+        <template
+          v-else
+          class="Pas_Amis"
+        >
+          <div>
+            <p class="Pas_Amis">Aucun amis.. </p>
+          </div>
         </template>
-        <template v-else class="Pas_Amis" > <div><p class="Pas_Amis">Aucun amis.. </p></div> </template>
       </v-list>
     </v-navigation-drawer>
 
     <v-main>
-      <v-card flat class="d-flex flex-column fill-height">
+      <v-card
+        flat
+        class="d-flex flex-column fill-height"
+      >
         <v-card-title>
           john doe
         </v-card-title>
         <v-card-text class="flex-grow-1 overflow-y-auto">
-          <template v-for="(msg) in messages"  >
+          <template v-for="(msg) in messages">
 
             <div :class="{'d-flex flex-row-reverse' :  checkUser(msg) }">
-              <v-avatar v-if="!checkUser(msg)" class="ma-4" color="grey darken-1" size="52">
-                <img alt="Avatar" :src= userTalk.photo >
+              <v-avatar
+                v-if="!checkUser(msg)"
+                class="ma-4"
+                color="grey darken-1"
+                size="52"
+              >
+                <img
+                  alt="Avatar"
+                  :src=userTalk.photo
+                >
               </v-avatar>
-                <template >
+              <template>
 
-                  <v-chip :color=" checkUser(msg) ? '#7626DE' : 'grey darken-1'" dark style="height:auto;white-space: normal;"
-                    class="pa-4 mb-2" >
-                    {{ msg.contenu }}
-                    <sub class="ml-2" style="font-size: 0.5rem;">{{  }}</sub>
-                  </v-chip>
-                </template>
-                <v-list>
-                </v-list>
+                <v-chip
+                  :color=" checkUser(msg) ? '#7626DE' : 'grey darken-1'"
+                  dark
+                  style="height:auto;white-space: normal;"
+                  class="pa-4 mb-2"
+                >
+                  {{ msg.contenu }}
+                  <sub
+                    class="ml-2"
+                    style="font-size: 0.5rem;"
+                  >{{  }}</sub>
+                </v-chip>
+              </template>
+              <v-list>
+              </v-list>
             </div>
           </template>
         </v-card-text>
       </v-card>
     </v-main>
 
-    <v-footer app  height="72" inset>
+    <v-footer
+      app
+      height="72"
+      inset
+    >
       <v-row>
         <v-col cols="12">
-          <v-text-field v-model="inputMessages" label="type_a_message" type="text" no-details outlined
-            append-outer-icon="mdi-send" @click:append-outer="sendMessage" @keydown.enter="sendMessage" filled clear-icon="mdi-close-circle" clearable></v-text-field>
+          <v-text-field
+            v-model="inputMessages"
+            label="type_a_message"
+            type="text"
+            no-details
+            outlined
+            append-outer-icon="mdi-send"
+            @click:append-outer="sendMessage"
+            @keydown.enter="sendMessage"
+            filled
+            clear-icon="mdi-close-circle"
+            clearable
+          ></v-text-field>
         </v-col>
       </v-row>
     </v-footer>
@@ -115,7 +215,7 @@ import VueSocketIOExt from 'vue-socket.io-extended'
 import io from 'socket.io-client'
 Vue.config.productionTip = false
 
-const socketConnection = io('http://localhost:8000')
+const socketConnection = io(`${process.env.VUE_APP_BACK_URL}`)
 
 Vue.use(VueSocketIOExt, socketConnection)
 export default {
@@ -161,7 +261,7 @@ export default {
     },
     // methode qui permet de recup les conversation
     async recupConv () {
-      const recup = await axios.get(`http://localhost:8000/conversations/utilisateur/${this.user_Id}`)
+      const recup = await axios.get(`${process.env.VUE_APP_BACK_URL}/conversations/utilisateur/${this.user_Id}`)
         .then((r) => {
           this.conversations = r.data.reduce((acc, curr) => {
             if (curr.fk_utilisateur1_id !== JSON.parse(this.user_Id)) {
@@ -215,7 +315,7 @@ export default {
       return recup
     },
     getUser () {
-      const user = axios.get(`http://localhost:8000/utilisateurs/${this.user_Id}`)
+      const user = axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
         .then((res) => {
           this.user = res.data
         })
@@ -239,9 +339,9 @@ export default {
         fk_conversation_id: this.conversations_id
       }
       console.log(message)
-      await axios.post('http://localhost:8000/messages', message)
+      await axios.post(`${process.env.VUE_APP_BACK_URL}/messages`, message)
         .then((r) => {
-        // console.log(r)
+          // console.log(r)
           this.$socket.client.emit('message', r.data)
           console.log('fait')
         }).catch((value) => {
