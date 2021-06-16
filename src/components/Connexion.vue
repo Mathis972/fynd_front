@@ -114,6 +114,13 @@ export default {
         this.$router.push({ name: 'Chat' })
       } else {
         this.error = response.message
+        this.$notify({
+          group: 'foo',
+          title: 'Important message',
+          text: `${response.message}`,
+          type: 'error',
+          Width: '100px'
+        })
       }
     },
     register: async function () {

@@ -60,10 +60,11 @@ export default {
           }
         })
         .catch(function (e) {
+          console.log(e)
           localStorage.removeItem('token')
           localStorage.removeItem('utilisateur')
           commit('SET_USER_LOADING', false)
-          returnValue = { error: true, message: e.response.data.message }
+          returnValue = { error: true, message: e.data.message }
         })
       Promise.all([connectionRequest]).then(function () { })
       return returnValue
@@ -92,6 +93,7 @@ export default {
           } else {
             localStorage.removeItem('token')
             localStorage.removeItem('utilisateur')
+            console.log(r)
           }
         })
         .catch(function (e) {
@@ -99,7 +101,7 @@ export default {
           localStorage.removeItem('token')
           localStorage.removeItem('utilisateur')
           commit('SET_USER_LOADING', false)
-          returnValue = { error: true, message: e.response.data.message }
+          returnValue = { error: true, message: e.response.data.error }
         })
       Promise.all([connectionRequest]).then(function () { })
       return returnValue
