@@ -42,6 +42,33 @@ export default {
       localStorage.removeItem('utilisateur')
     },
 
+    register: async function ({ commit, state }, data) {
+      let payload = {}
+      payload = data
+      let returnValue
+      const connectionRequest = await axios.post(`${process.env.VUE_APP_BACK_URL}/utilisateurs/register`, payload)
+        .then((r) => {
+          commit('SET_USER_LOADING', false)
+          if (r.status === 201) {
+            localStorage.setItem('token', r.data.token)
+            localStorage.setItem('utilisateur', JSON.stringify(r.data.userId))
+            localStorage.setItem('logged', true)
+            commit('SET_TOKEN', r.data.token)
+            commit('SET_USER_ID', r.data.userId)
+            commit('SET_IS_LOGGED', true)
+            returnValue = { error: false }
+          }
+        })
+        .catch(function (e) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('utilisateur')
+          commit('SET_USER_LOADING', false)
+          returnValue = { error: true, message: e.response.data.message }
+        })
+      Promise.all([connectionRequest]).then(function () { })
+      return returnValue
+    },
+
     logIn: async function ({ commit, state }, data) {
       const payload = {}
       let returnValue
@@ -68,6 +95,7 @@ export default {
           }
         })
         .catch(function (e) {
+          console.log(e)
           localStorage.removeItem('token')
           localStorage.removeItem('utilisateur')
           commit('SET_USER_LOADING', false)
