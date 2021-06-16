@@ -249,6 +249,7 @@ export default {
       }
     },
     checkUser (data) {
+      console.log('data:    ' + data.conversation)
       console.log(data)
       if ((data.conversation.fk_utilisateur1_id === parseInt(this.user_Id) && data.send_by_user1 && !this.userTalk.est_user_1) || (data.conversation.fk_utilisateur2_id === parseInt(this.user_Id) && !data.send_by_user1 && this.userTalk.est_user_1)) {
         console.log('true')
@@ -321,7 +322,8 @@ export default {
         })
       return user
     },
-    connectToRoom (utilisateur) {
+    async connectToRoom (utilisateur) {
+      this.messages = ''
       console.log(utilisateur)
       this.conversations_id = utilisateur.conversations_id
       this.userTalk = {
@@ -331,6 +333,12 @@ export default {
         id: utilisateur.id
       }
       this.$socket.client.emit('joinRoom', utilisateur.conversations_id)
+      // const payload = { conversation_id: utilisateur.conversations_id }
+      const self = this
+      await axios.get(`${process.env.VUE_APP_BACK_URL}/messages`, { params: { conversation_id: utilisateur.conversations_id } })
+        .then((value) => {
+          self.messages = value.data
+        })
     },
     async sendMessage () {
       let message = {
@@ -338,7 +346,6 @@ export default {
         send_by_user1: !this.userTalk.est_user_1,
         fk_conversation_id: this.conversations_id
       }
-      console.log(message)
       await axios.post(`${process.env.VUE_APP_BACK_URL}/messages`, message)
         .then((r) => {
           // console.log(r)
@@ -384,8 +391,7 @@ export default {
     photoProfilUser: {},
     id: '',
     inputMessages: '',
-    messages: [
-    ],
+    messages: [],
     conversations_id: undefined,
     conversations: undefined,
     drawer: null,
