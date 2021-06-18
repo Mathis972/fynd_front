@@ -33,108 +33,7 @@
         </div>
       </div>
     </v-app-bar>
-
-    <v-navigation-drawer
-      v-model="drawer"
-      app
-      width="300"
-    >
-      <v-sheet
-        color="grey lighten-5"
-        width="100%"
-        class=" sheet"
-      >
-        <v-row
-          class="content-profile"
-          align="center"
-          justify="center"
-        >
-          <v-col
-            cols="4"
-            md="4"
-          >
-            <v-avatar
-              class=""
-              color="grey darken-1"
-              size="52"
-            >
-              <img
-                alt="Avatar"
-                :src="getAvatarProfil.photo_url"
-              >
-            </v-avatar>
-          </v-col>
-          <v-col
-            cols="7"
-            md="6"
-          >
-            <div class="Text_profile "> {{ user.prenom}} </div>
-          </v-col>
-          <v-col
-            cols="1"
-            md="2"
-          >
-            <v-menu offset-y>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  v-on="on"
-                  v-bind="attrs"
-                  text
-                  icon
-                  color="red lighten-2"
-                >
-                  <v-icon color="white"> mdi-dots-vertical </v-icon>
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item
-                  v-for="(item, index) in listMenu"
-                  :key="index"
-                  @click="menuActionClick(item.action)"
-                >
-                  <v-list-item-title>{{ item.title }}</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </v-col>
-        </v-row>
-      </v-sheet>
-
-      <v-list>
-        <v-subheader class="titre-conversation">Mes amis sauvegardées </v-subheader>
-        <v-divider></v-divider>
-        <template v-if="conversations.length > 0">
-          <template v-for="(conversationsListe) in conversations">
-            <v-divider :key="conversationsListe.conversations_id"></v-divider>
-            <v-list-item
-              @click="connectToRoom(conversationsListe)"
-              :key="conversationsListe.prenom"
-            >
-              <v-list-item-avatar>
-                <v-img :src="conversationsListe.photo.photo_url"></v-img>
-              </v-list-item-avatar>
-
-              <v-list-item-content>
-                <v-list-item-title v-html="conversationsListe.prenom"></v-list-item-title>
-                <v-list-item-subtitle
-                  v-if="conversationsListe.messages"
-                  v-html="conversationsListe.messages.contenu"
-                ></v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </template>
-        </template>
-        <template
-          v-else
-          class="Pas_Amis"
-        >
-          <div>
-            <p class="Pas_Amis">Aucun amis.. </p>
-          </div>
-        </template>
-      </v-list>
-    </v-navigation-drawer>
-
+<Menu @connectToRoom="connectToRoom" :conversations="conversations" :user="user" :listMenu="listMenu" :AvatarProfil="getAvatarProfil"></Menu>
     <v-main>
       <v-card
         flat
@@ -211,6 +110,7 @@
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import axios from 'axios'
+import Menu from './NavBar/Menu'
 import VueSocketIOExt from 'vue-socket.io-extended'
 import io from 'socket.io-client'
 Vue.config.productionTip = false
@@ -219,6 +119,7 @@ const socketConnection = io(`${process.env.VUE_APP_BACK_URL}`)
 
 Vue.use(VueSocketIOExt, socketConnection)
 export default {
+  components: { Menu },
   async created () {
     await this.getUser()
     await this.idLaunch()
