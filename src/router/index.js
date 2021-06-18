@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import store from '../store/user'
 // import Connexion from '../views/Connexion.vue'
 import Quizz from '../views/Quizz.vue'
+import Profil from '../views/Profil.vue'
 
 Vue.use(VueRouter)
 
@@ -24,6 +25,11 @@ const routes = [
     path: '/quizz',
     name: 'Quizz',
     component: Quizz
+  },
+  {
+    path: '/profil',
+    name: 'Profil',
+    component: Profil
   },
   {
     path: '/about',
