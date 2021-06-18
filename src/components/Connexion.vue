@@ -1,7 +1,9 @@
 <template>
   <div id="accueil">
-    <h2>Fynd</h2>
+    <div class="imageAccueil">
+    <img src="../assets/Logo_fynd.png" class="fynd-logo">
     <p class="text-presentation">Venez discutez avec ceux qui vous correspondent!</p>
+    </div>
     <v-container class="grey lighten-5" style="margin-top: 50px">
         <v-row
           justify="center"
@@ -159,7 +161,22 @@ export default {
 #accueil {
   margin-top: 20px;
 }
-
+html {
+height:100%;
+  background-size:100% auto;
+}
+body {
+  min-height:100%;
+  background:
+    linear-gradient(
+    -140deg,
+    transparent 40%, #de268e 0%, #d57c29 100%, #d57e27 103.36% !important
+  )
+}
+.fynd-logo{
+width: 20%;
+margin: auto;
+}
 body {
   font-family:'system-ui'!important;
 }
@@ -176,9 +193,11 @@ h3, h2 {
   font-family:'system-ui'!important;
 
 }
-
+.imageAccueil{
+  text-align: center;
+}
 .text-presentation {
-  margin-top: 30px;
+  font-size: 25px;
   color: white;
   text-align: center;
   font-family:'system-ui'!important;
