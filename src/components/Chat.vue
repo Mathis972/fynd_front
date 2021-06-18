@@ -33,7 +33,7 @@
         </div>
       </div>
     </v-app-bar>
-<Menu @connectToRoom="connectToRoom" :conversations="conversations" :user="user" :listMenu="listMenu" :AvatarProfil="getAvatarProfil"></Menu>
+<Menu @connectToRoom="connectToRoom" :conversations="conversations"  ></Menu>
     <v-main>
       <v-card
         flat
@@ -54,7 +54,7 @@
               >
                 <img
                   alt="Avatar"
-                  :src=userTalk.photo
+                  :src="userTalk.photo"
                 >
               </v-avatar>
               <template>
@@ -121,7 +121,6 @@ Vue.use(VueSocketIOExt, socketConnection)
 export default {
   components: { Menu },
   async created () {
-    await this.getUser()
     await this.idLaunch()
     // await this.setUserName()
     // await this.full()
@@ -129,26 +128,9 @@ export default {
     // await this.getAvatarProfil()
   },
   computed: {
-    getAvatarProfil () {
-      if (!this.user) {
-        return ''
-      } else {
-        // console.log(this.user)
-        const user = this.user.photo_utilisateur.find(photo => photo.est_photo_profil === true)
-        return user
-      }
-    },
     ...mapGetters(['user_Id'])
   },
   methods: {
-    menuActionClick (action) {
-      if (action === 'Mon Compte') {
-        alert('TEST!!')
-      } else if (action === 'deconnexion') {
-        this.$store.dispatch('logOut')
-        this.$router.push({ name: 'Connexion' })
-      }
-    },
     checkUser (data) {
       console.log('data:    ' + data.conversation)
       console.log(data)
@@ -295,14 +277,8 @@ export default {
     messages: [],
     conversations_id: undefined,
     conversations: undefined,
-    drawer: null,
-    user: undefined,
-    listMenu: [
-      { title: 'Mon compte', action: 'Mon compte' },
-      { title: 'Déconnexion', action: 'deconnexion' }
-    ]
-  }
-  )
+    drawer: null
+  })
 }
 
 </script>
