@@ -6,7 +6,7 @@
       :key="question.id"
     >
       <div v-show="question.id === index_question_courante">
-        <p class="text-question">Question n°{{index_question_courante}} sur {{liste_questions.length}} - {{question.message}}</p>
+        <p class="text-question">Question n°{{question.id}} sur {{liste_questions.length}} - {{question.message}}</p>
         <v-radio-group
           v-model="reponse_utilisateur[question.id]"
           row
@@ -50,6 +50,8 @@
 
 <script>
 import axios from 'axios'
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'QuestionsQuizz',
   data () {
@@ -66,10 +68,12 @@ export default {
   async mounted () {
     await axios.get(`${process.env.VUE_APP_BACK_URL}/questions`)
       .then(res => {
+        console.log(res)
         res.data.forEach(question => this.liste_questions.push(question))
       })
     await axios.get(`${process.env.VUE_APP_BACK_URL}/reponses`)
       .then(res => {
+        console.log(res)
         res.data.forEach(reponse => this.liste_reponses.push(reponse))
       })
     const questionReponses = []
@@ -83,10 +87,14 @@ export default {
     })
     this.questions_reponses = questionReponses
   },
+
+  computed: {
+    ...mapGetters(['user_Id'])
+  },
   methods: {
     next: function () {
       if (this.index_question_courante === this.questions_reponses.length) {
-        axios.post(`${process.env.VUE_APP_BACK_URL}/reponses_utilisateurs`, { reponses_utilisateur: this.reponse_utilisateur })
+        axios.post(`${process.env.VUE_APP_BACK_URL}/reponses_utilisateurs`, { reponses_utilisateur: this.reponse_utilisateur, id: parseInt(this.user_Id) })
       }
       this.index_question_courante++
       this.boutonSuivant = false
@@ -128,6 +136,7 @@ h3, h2 {
   margin-right: 10px;
   height: 50px;
   flex: 1;
+  color:black!important;
   border: 1px solid grey;
 }
 
@@ -138,6 +147,9 @@ h3, h2 {
 </style>
 
 <style>
+.v-input--selection-controls .v-input__slot > .v-label, .v-input--selection-controls .v-radio > .v-label {
+color:black!important;
+}
 .theme--light.v-label {
   color:black !important;
 }
