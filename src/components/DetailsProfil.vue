@@ -14,6 +14,7 @@
           <v-col
             cols="12"
             sm="4"
+            style="background-color:white"
           >
             <h2>Profil</h2>
             <p>description</p>
