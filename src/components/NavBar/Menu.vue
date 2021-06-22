@@ -23,7 +23,7 @@
               color="grey darken-1"
               size="52"
             >
-              <img
+              <img v-if="AvatarProfile !=undefined"
                 alt="Avatar"
                 :src="AvatarProfil.photo_url"
               >
