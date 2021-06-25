@@ -6,7 +6,7 @@ import axios from 'axios'
 Vue.use(Vuex)
 export default {
   state: {
-    isLogged: false,
+    isLogged: localStorage.getItem('logged'),
     token: undefined,
     userLoading: false,
     userId: localStorage.getItem('utilisateur') || undefined
@@ -40,6 +40,8 @@ export default {
       commit('SET_IS_LOGGED', '')
       localStorage.removeItem('token')
       localStorage.removeItem('utilisateur')
+      localStorage.removeItem('logged')
+      commit('SET_IS_LOGGED', false)
     },
 
     register: async function ({ commit, state }, data) {

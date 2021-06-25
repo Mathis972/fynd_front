@@ -23,7 +23,7 @@
               color="grey darken-1"
               size="52"
             >
-              <img
+              <img v-if="AvatarProfile !=undefined"
                 alt="Avatar"
                 :src="avatar.photo_url"
               >
@@ -66,7 +66,7 @@
       </v-sheet>
 
       <v-list>
-       <list-user @connect="RoomConnect" :conversations="conversations"></list-user>
+       <list-user @connect="RoomConnect" :conversations="conversations" ></list-user>
       </v-list>
     </v-navigation-drawer>
     </div>
@@ -98,6 +98,9 @@ export default {
     await this.$emit('userAvatar', this.avatar)
   },
   methods: {
+    RoomConnect: function (value, value2) {
+      this.$emit('connectToRoom', value, value2)
+    },
     menuActionClick (action) {
       if (action === 'Mon Compte') {
         alert('TEST!!')

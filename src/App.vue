@@ -21,10 +21,19 @@ export default {
 </script>
 
 <style>
+#app{
+width: 100%;
+height: 100%;
+}
   .vue-notification {
   padding: 10px;
   margin: 0 5px 5px;
   font-size: 20px!important;
   color: #ffffff;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 </style>
