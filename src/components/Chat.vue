@@ -1,7 +1,6 @@
 <template>
   <v-app
     id="inspire"
-    v-if="conversations"
   >
   <Modal :dialog="dialog" @close="dialog=false" ></Modal>
     <v-app-bar
@@ -123,10 +122,14 @@ export default {
   async created () {
     await this.getUser()
     await this.idLaunch()
-    // await this.setUserName()
-    // await this.full()
     await this.recupConv()
-    // await this.getAvatarProfil()
+    if (localStorage.getItem('userTalk') === null && localStorage.getItem('conversationId')) {
+      this.userTalk = {}
+    } else {
+      this.userTalk = JSON.parse(localStorage.getItem('userTalk'))
+      console.log(JSON.parse(localStorage.getItem('userTalk')))
+      this.conversations_id = parseInt(localStorage.getItem('conversationId'))
+    }
   },
   computed: {
     getAvatarProfil () {
@@ -150,37 +153,29 @@ export default {
         })
       console.log(userMatch)
       this.arrayMatch = userMatch
-      console.log(this.arrayMatch[0].fk_utilisateur_id)
-      const idUserTalk = this.arrayMatch[0].fk_utilisateur_id
-      await axios.post(`${process.env.VUE_APP_BACK_URL}/conversations`, { fk_utilisateur1_id: this.user_Id, fk_utilisateur2_id: this.arrayMatch[0].fk_utilisateur_id })
+      console.log(this.arrayMatch[0].util2)
+      const idUserTalk = this.arrayMatch[0].util2
+      await axios.post(`${process.env.VUE_APP_BACK_URL}/conversations`, { fk_utilisateur1_id: parseInt(this.user_Id), fk_utilisateur2_id: this.arrayMatch[0].util2 })
         .then((r) => {
           console.log(r)
           console.log(r.data)
           axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${idUserTalk}`)
             .then(r => {
               this.userTalk = r.data
+              localStorage.setItem('userTalk', JSON.stringify(this.userTalk))
               this.recupConv()
-              this.$socket.client.emit('joinRoom', r.id)
             })
+          this.$socket.client.emit('joinRoom', r.data.id)
+          this.conversations_id = r.data.id
+          localStorage.setItem('conversationId', parseInt(this.conversations_id))
         })
       return userMatch
     },
-    menuActionClick (action) {
-      if (action === 'Mon Compte') {
-        alert('TEST!!')
-      } else if (action === 'deconnexion') {
-        this.$store.dispatch('logOut')
-        this.$router.push({ name: 'Connexion' })
-      }
-    },
     checkUser (data) {
-      console.log('data:' + data.conversation)
       console.log(data)
       if ((data.conversation.fk_utilisateur1_id === parseInt(this.user_Id) && data.send_by_user1 && !this.userTalk.est_user_1) || (data.conversation.fk_utilisateur2_id === parseInt(this.user_Id) && !data.send_by_user1 && this.userTalk.est_user_1)) {
-        console.log('true')
         return true
       } else {
-        console.log('false')
         console.log(data.conversation.fk_utilisateur1_id, this.user_Id, data.send_by_user1, this.userTalk.est_user_1)
         return false
       }
@@ -257,6 +252,8 @@ export default {
         photo: utilisateur.photo !== undefined ? utilisateur.photo.photo_url : '',
         id: utilisateur.id
       }
+      localStorage.setItem('userTalk', JSON.stringify(this.userTalk))
+      localStorage.setItem('conversationId', parseInt(this.conversations_id))
       this.$socket.client.emit('joinRoom', utilisateur.conversations_id)
       // const payload = { conversation_id: utilisateur.conversations_id }
       const self = this
@@ -275,9 +272,7 @@ export default {
         .then((r) => {
           // console.log(r)
           this.$socket.client.emit('message', r.data)
-          console.log('fait')
         }).catch((value) => {
-          console.log(value)
         })
       message = ''
       // send the content of the message bar to the server
@@ -292,7 +287,6 @@ export default {
       console.log('connected to chat server')
     },
     message (data) {
-      console.log(data)
       this.messages.push(data)
     }
   },

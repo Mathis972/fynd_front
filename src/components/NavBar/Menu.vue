@@ -78,6 +78,14 @@ export default {
   methods: {
     RoomConnect: function (value) {
       this.$emit('connectToRoom', value)
+    },
+    menuActionClick (action) {
+      if (action === 'Mon Compte') {
+        alert('TEST!!')
+      } else if (action === 'deconnexion') {
+        this.$store.dispatch('logOut')
+        this.$router.push({ name: 'Connexion' })
+      }
     }
   },
   components: { ListUser },
