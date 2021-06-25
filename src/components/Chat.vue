@@ -148,49 +148,52 @@ export default {
       const recup = await axios.get(`${process.env.VUE_APP_BACK_URL}/conversations/utilisateur/${this.user_Id}`)
         .then((r) => {
           this.conversations = r.data.reduce((acc, curr) => {
-            if (curr.fk_utilisateur1_id !== JSON.parse(this.user_Id)) {
-              if (curr.message.length > 0) {
-                acc.push({
-                  est_user_1: true,
-                  conversations_id: curr.id,
-                  id: curr.fk_utilisateur1_id,
-                  photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                  prenom: curr.utilisateurs1.prenom,
-                  messages: curr.message.reduce((a, b) => {
-                    return new Date(a.created_date) > new Date(b.created_date) ? a : b
+            console.log(curr.est_enregistre)
+            if (curr.est_enregistre === true) {
+              if (curr.fk_utilisateur1_id !== JSON.parse(this.user_Id)) {
+                if (curr.message.length > 0) {
+                  acc.push({
+                    est_user_1: true,
+                    conversations_id: curr.id,
+                    id: curr.fk_utilisateur1_id,
+                    photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                    prenom: curr.utilisateurs1.prenom,
+                    messages: curr.message.reduce((a, b) => {
+                      return new Date(a.created_date) > new Date(b.created_date) ? a : b
+                    })
                   })
-                })
-              } else {
-                acc.push({
-                  est_user_1: true,
-                  conversations_id: curr.id,
-                  id: curr.fk_utilisateur1_id,
-                  photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                  prenom: curr.utilisateurs1.prenom,
-                  messages: ''
-                })
-              }
-            } else {
-              if (curr.message.length > 0) {
-                acc.push({
-                  est_user_1: false,
-                  conversations_id: curr.id,
-                  id: curr.fk_utilisateur2_id,
-                  photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                  prenom: curr.utilisateur2.prenom,
-                  messages: curr.message.reduce((a, b) => {
-                    return new Date(a.created_date) > new Date(b.created_date) ? a : b
+                } else {
+                  acc.push({
+                    est_user_1: true,
+                    conversations_id: curr.id,
+                    id: curr.fk_utilisateur1_id,
+                    photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                    prenom: curr.utilisateurs1.prenom,
+                    messages: ''
                   })
-                })
+                }
               } else {
-                acc.push({
-                  est_user_1: false,
-                  conversations_id: curr.id,
-                  id: curr.fk_utilisateur2_id,
-                  photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                  prenom: curr.utilisateur2.prenom,
-                  messages: ''
-                })
+                if (curr.message.length > 0) {
+                  acc.push({
+                    est_user_1: false,
+                    conversations_id: curr.id,
+                    id: curr.fk_utilisateur2_id,
+                    photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                    prenom: curr.utilisateur2.prenom,
+                    messages: curr.message.reduce((a, b) => {
+                      return new Date(a.created_date) > new Date(b.created_date) ? a : b
+                    })
+                  })
+                } else {
+                  acc.push({
+                    est_user_1: false,
+                    conversations_id: curr.id,
+                    id: curr.fk_utilisateur2_id,
+                    photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                    prenom: curr.utilisateur2.prenom,
+                    messages: ''
+                  })
+                }
               }
             }
             return acc
