@@ -1,6 +1,6 @@
 <template>
   <div id="accueil">
-    <div class="imageAccueil">
+    <!-- <div class="imageAccueil">
     <img src="../assets/Logo_fynd.png" class="fynd-logo">
     <p class="text-presentation">Venez discutez avec ceux qui vous correspondent!</p>
     </div>
@@ -98,7 +98,7 @@
             </v-card>
           </v-col>
         </v-row>
-      </v-container>
+      </v-container> -->
     </div>
 </template>
 
