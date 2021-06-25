@@ -25,7 +25,7 @@
             >
               <img v-if="AvatarProfile !=undefined"
                 alt="Avatar"
-                :src="AvatarProfil.photo_url"
+                :src="avatar.photo_url"
               >
             </v-avatar>
           </v-col>
@@ -73,8 +73,30 @@
 </template>
 
 <script>
+import axios from 'axios'
 import ListUser from '@/components/NavBar/ListUser'
+import { mapGetters } from 'vuex'
+
 export default {
+  computed: {
+    ...mapGetters(['user_Id'])
+  },
+  data () {
+    return {
+      user: {},
+      avatar: {},
+      listMenu: [
+        { title: 'Mon compte', action: 'Mon compte' },
+        { title: 'Déconnexion', action: 'deconnexion' }
+      ]
+    }
+  },
+  async created () {
+    await this.getUser()
+    await this.getAvatarProfil()
+    await this.$emit('userDetails', this.user)
+    await this.$emit('userAvatar', this.avatar)
+  },
   methods: {
     RoomConnect: function (value, value2) {
       this.$emit('connectToRoom', value, value2)
@@ -86,14 +108,31 @@ export default {
         this.$store.dispatch('logOut')
         this.$router.push({ name: 'Connexion' })
       }
+    },
+    getAvatarProfil () {
+      if (!this.user) {
+        return ''
+      } else {
+        // console.log(this.user)
+        const user = this.user.photo_utilisateur.find(photo => photo.est_photo_profil === true)
+        this.avatar = user
+      }
+    },
+    getUser () {
+      const user = axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
+        .then((res) => {
+          this.user = res.data
+        })
+      return user
+    },
+    RoomConnect: function (value) {
+      this.$emit('connectToRoom', value)
     }
   },
   components: { ListUser },
   props: {
     conversations: Array,
-    user: Object,
-    AvatarProfil: Object,
-    listMenu: Array
+    AvatarProfil: Object
   }
 }
 </script>
