@@ -1,7 +1,7 @@
 <template>
     <div>
-      <Menu @userDetails="userDetails" />
-      <DetailsProfil :user="user" />
+      <Menu @userDetails="userDetails" @userAvatar="userAvatar" />
+      <DetailsProfil :user="user" :avatar="avatar" />
     </div>
 </template>
 
@@ -17,12 +17,16 @@ export default {
   },
   data () {
     return {
-      user: {}
+      user: {},
+      avatar: {}
     }
   },
   methods: {
     userDetails (user) {
       this.user = user
+    },
+    userAvatar (avatar) {
+      this.avatar = avatar
     }
   }
 }

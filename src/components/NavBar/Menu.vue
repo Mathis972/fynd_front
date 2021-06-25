@@ -95,6 +95,7 @@ export default {
     await this.getUser()
     await this.getAvatarProfil()
     await this.$emit('userDetails', this.user)
+    await this.$emit('userAvatar', this.avatar)
   },
   methods: {
     menuActionClick (action) {
@@ -115,8 +116,7 @@ export default {
       }
     },
     getUser () {
-      // const user = axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
-      const user = axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/1`)
+      const user = axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
         .then((res) => {
           this.user = res.data
         })
