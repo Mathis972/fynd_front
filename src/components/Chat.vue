@@ -19,10 +19,11 @@
           color="grey darken-1"
           size="52"
         >
-          <img
+          <img v-if="userTalk.photo !== '' "
             alt="Avatar"
             :src="userTalk.photo"
           >
+          <span v-else class="white--text "> {{ userTalk.initiale }} </span>
         </v-avatar>
           <span class="user">{{ userTalk.prenom }}</span>
       </div>
@@ -42,7 +43,6 @@
         </v-card-title>
         <v-card-text class="flex-grow-1 overflow-y-auto">
           <template v-for="(msg) in messages">
-
             <div :class="{'d-flex flex-row-reverse' :  checkUser(msg) }">
               <v-avatar
                 v-if="!checkUser(msg)"
@@ -123,13 +123,7 @@ export default {
     await this.getUser()
     await this.idLaunch()
     await this.recupConv()
-    if (localStorage.getItem('userTalk') === null && localStorage.getItem('conversationId')) {
-      this.userTalk = {}
-    } else {
-      this.userTalk = JSON.parse(localStorage.getItem('userTalk'))
-      console.log(JSON.parse(localStorage.getItem('userTalk')))
-      this.conversations_id = parseInt(localStorage.getItem('conversationId'))
-    }
+    await this.getUserAfterRefresh()
   },
   computed: {
     getAvatarProfil () {
@@ -144,6 +138,20 @@ export default {
     ...mapGetters(['user_Id'])
   },
   methods: {
+    getUserAfterRefresh: async function () {
+      const self = this
+      if (localStorage.getItem('userTalk') === null && localStorage.getItem('conversationId')) {
+        this.userTalk = {}
+      } else {
+        this.userTalk = JSON.parse(localStorage.getItem('userTalk'))
+        console.log(JSON.parse(localStorage.getItem('userTalk')))
+        this.conversations_id = parseInt(localStorage.getItem('conversationId'))
+        await axios.get(`${process.env.VUE_APP_BACK_URL}/messages`, { params: { conversation_id: this.conversations_id } })
+          .then((value) => {
+            self.messages = value.data
+          })
+      }
+    },
     close: function () {
     },
     nextPersonne: async function () {
@@ -242,15 +250,16 @@ export default {
         })
       return user
     },
-    async connectToRoom (utilisateur) {
+    async connectToRoom (utilisateur, initial) {
       this.messages = ''
-      console.log(utilisateur)
+      console.log(initial)
       this.conversations_id = utilisateur.conversations_id
       this.userTalk = {
         est_user_1: utilisateur.est_user_1,
         prenom: utilisateur.prenom,
         photo: utilisateur.photo !== undefined ? utilisateur.photo.photo_url : '',
-        id: utilisateur.id
+        id: utilisateur.id,
+        initiale: initial !== undefined ? initial : ''
       }
       localStorage.setItem('userTalk', JSON.stringify(this.userTalk))
       localStorage.setItem('conversationId', parseInt(this.conversations_id))

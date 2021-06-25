@@ -66,7 +66,7 @@
       </v-sheet>
 
       <v-list>
-       <list-user @connect="RoomConnect" :conversations="conversations"></list-user>
+       <list-user @connect="RoomConnect" :conversations="conversations" ></list-user>
       </v-list>
     </v-navigation-drawer>
     </div>
@@ -76,8 +76,8 @@
 import ListUser from '@/components/NavBar/ListUser'
 export default {
   methods: {
-    RoomConnect: function (value) {
-      this.$emit('connectToRoom', value)
+    RoomConnect: function (value, value2) {
+      this.$emit('connectToRoom', value, value2)
     },
     menuActionClick (action) {
       if (action === 'Mon Compte') {

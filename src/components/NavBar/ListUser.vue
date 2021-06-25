@@ -6,8 +6,8 @@
       <template v-for="(conversationsListe) in conversations">
         <v-divider :key="conversationsListe.conversations_id"></v-divider>
         <v-list-item @click="connectToRoom(conversationsListe)" :key="conversationsListe.prenom">
-          <v-list-item-avatar v-if="conversationsListe.photo == undefined">
-            <v-img src=""> </v-img>
+          <v-list-item-avatar v-if="conversationsListe.photo == undefined" color="#EC407A">
+           <span class="white--text "> {{ getInitials(conversationsListe.prenom) }} </span>
           </v-list-item-avatar>
           <v-list-item-avatar v-else>
             <v-img :src="conversationsListe.photo.photo_url"></v-img>
@@ -30,13 +30,24 @@
 <script>
 export default {
   methods: {
+    getInitials: function (name) {
+      let initials = name.split(' ')
+      if (initials.length > 1) {
+        initials = initials.shift().charAt(0) + initials.pop().charAt(0)
+      } else {
+        initials = name.substring(0, 2)
+      }
+      return initials.toUpperCase()
+    },
     connectToRoom: function (value) {
       console.log(value)
-      this.$emit('connect', value)
+      this.$emit('connect', value, this.getInitials(value.prenom))
     }
   },
   data () {
-    return {}
+    return {
+      initial: ''
+    }
   },
   props: {
     conversations: Array
