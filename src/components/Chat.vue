@@ -31,7 +31,7 @@
           <v-btn @click="dialog=true"> dialog </v-btn>
           <!-- <span class="time">{{ time }}</span> -->
     </v-app-bar>
-<Menu @connectToRoom="connectToRoom" :conversations="conversations"  ></Menu>
+<Menu :avatar="avatar" :user="user" @connectToRoom="connectToRoom" :conversations="conversations"  ></Menu>
     <v-main>
       <v-card
         flat
@@ -119,10 +119,11 @@ Vue.use(VueSocketIOExt, socketConnection)
 export default {
   components: { Menu, Modal },
   async created () {
-    console.log(this.$route.name)
     await this.idLaunch()
     await this.recupConv()
     await this.getUserAfterRefresh()
+    await this.getUser()
+    await this.getAvatarProfil()
   },
   computed: {
     ...mapGetters(['user_Id'])
@@ -134,7 +135,6 @@ export default {
         this.userTalk = {}
       } else {
         this.userTalk = JSON.parse(localStorage.getItem('userTalk'))
-        console.log(JSON.parse(localStorage.getItem('userTalk')))
         this.conversations_id = parseInt(localStorage.getItem('conversationId'))
         await axios.get(`${process.env.VUE_APP_BACK_URL}/messages`, { params: { conversation_id: this.conversations_id } })
           .then((value) => {
@@ -149,14 +149,10 @@ export default {
         .then((r) => {
           return r.data
         })
-      console.log(userMatch)
       this.arrayMatch = userMatch
-      console.log(this.arrayMatch[0].util2)
       const idUserTalk = this.arrayMatch[0].util2
       await axios.post(`${process.env.VUE_APP_BACK_URL}/conversations`, { fk_utilisateur1_id: parseInt(this.user_Id), fk_utilisateur2_id: this.arrayMatch[0].util2 })
         .then((r) => {
-          console.log(r)
-          console.log(r.data)
           axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${idUserTalk}`)
             .then(r => {
               this.userTalk = r.data
@@ -170,11 +166,9 @@ export default {
       return userMatch
     },
     checkUser (data) {
-      console.log(data)
       if ((data.conversation.fk_utilisateur1_id === parseInt(this.user_Id) && data.send_by_user1 && !this.userTalk.est_user_1) || (data.conversation.fk_utilisateur2_id === parseInt(this.user_Id) && !data.send_by_user1 && this.userTalk.est_user_1)) {
         return true
       } else {
-        console.log(data.conversation.fk_utilisateur1_id, this.user_Id, data.send_by_user1, this.userTalk.est_user_1)
         return false
       }
     },
@@ -233,16 +227,29 @@ export default {
         })
       return recup
     },
-    getUser () {
-      const user = axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
+    getAvatarProfil () {
+      if (!this.user) {
+        return ''
+      } else {
+        const user = this.user.photo_utilisateur.find(photo => photo.est_photo_profil === true)
+        this.avatar = user
+        // this.avatar.photo_url = `${process.env.VUE_APP_BACK_URL}/${this.avatar.photo_url}`
+      }
+    },
+    async getUser () {
+      await axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
         .then((res) => {
           this.user = res.data
         })
-      return user
+        .catch((value) => {
+          console.err(value)
+        })
+      this.user.photo_utilisateur.forEach((value, index) => {
+        value.photo_url = `${process.env.VUE_APP_BACK_URL}/${value.photo_url}`
+      })
     },
     async connectToRoom (utilisateur, initial) {
       this.messages = ''
-      console.log(initial)
       this.conversations_id = utilisateur.conversations_id
       this.userTalk = {
         est_user_1: utilisateur.est_user_1,
@@ -269,7 +276,6 @@ export default {
       }
       await axios.post(`${process.env.VUE_APP_BACK_URL}/messages`, message)
         .then((r) => {
-          // console.log(r)
           this.$socket.client.emit('message', r.data)
         }).catch((value) => {
         })
@@ -303,7 +309,9 @@ export default {
     messages: [],
     conversations_id: undefined,
     conversations: undefined,
-    drawer: null
+    drawer: null,
+    user: {},
+    avatar: {}
   })
 }
 
