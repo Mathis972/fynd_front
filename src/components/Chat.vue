@@ -5,9 +5,8 @@
   <Modal :dialog="dialog" @close="dialog=false" ></Modal>
     <v-app-bar
       app
-      clipped-right
       flat
-      height="72"
+      height="65"
       color=" rgba(0, 0, 0, 0.87)"
     >
       <div
@@ -120,6 +119,7 @@ Vue.use(VueSocketIOExt, socketConnection)
 export default {
   components: { Menu, Modal },
   async created () {
+    console.log(this.$route.name)
     await this.idLaunch()
     await this.recupConv()
     await this.getUserAfterRefresh()
@@ -183,52 +183,49 @@ export default {
       const recup = await axios.get(`${process.env.VUE_APP_BACK_URL}/conversations/utilisateur/${this.user_Id}`)
         .then((r) => {
           this.conversations = r.data.reduce((acc, curr) => {
-            console.log(curr.est_enregistre)
-            if (curr.est_enregistre === true) {
-              if (curr.fk_utilisateur1_id !== JSON.parse(this.user_Id)) {
-                if (curr.message.length > 0) {
-                  acc.push({
-                    est_user_1: true,
-                    conversations_id: curr.id,
-                    id: curr.fk_utilisateur1_id,
-                    photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                    prenom: curr.utilisateurs1.prenom,
-                    messages: curr.message.reduce((a, b) => {
-                      return new Date(a.created_date) > new Date(b.created_date) ? a : b
-                    })
+            if (curr.fk_utilisateur1_id !== JSON.parse(this.user_Id)) {
+              if (curr.message.length > 0) {
+                acc.push({
+                  est_user_1: true,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur1_id,
+                  photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateurs1.prenom,
+                  messages: curr.message.reduce((a, b) => {
+                    return new Date(a.created_date) > new Date(b.created_date) ? a : b
                   })
-                } else {
-                  acc.push({
-                    est_user_1: true,
-                    conversations_id: curr.id,
-                    id: curr.fk_utilisateur1_id,
-                    photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                    prenom: curr.utilisateurs1.prenom,
-                    messages: ''
-                  })
-                }
+                })
               } else {
-                if (curr.message.length > 0) {
-                  acc.push({
-                    est_user_1: false,
-                    conversations_id: curr.id,
-                    id: curr.fk_utilisateur2_id,
-                    photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                    prenom: curr.utilisateur2.prenom,
-                    messages: curr.message.reduce((a, b) => {
-                      return new Date(a.created_date) > new Date(b.created_date) ? a : b
-                    })
+                acc.push({
+                  est_user_1: true,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur1_id,
+                  photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateurs1.prenom,
+                  messages: ''
+                })
+              }
+            } else {
+              if (curr.message.length > 0) {
+                acc.push({
+                  est_user_1: false,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur2_id,
+                  photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateur2.prenom,
+                  messages: curr.message.reduce((a, b) => {
+                    return new Date(a.created_date) > new Date(b.created_date) ? a : b
                   })
-                } else {
-                  acc.push({
-                    est_user_1: false,
-                    conversations_id: curr.id,
-                    id: curr.fk_utilisateur2_id,
-                    photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                    prenom: curr.utilisateur2.prenom,
-                    messages: ''
-                  })
-                }
+                })
+              } else {
+                acc.push({
+                  est_user_1: false,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur2_id,
+                  photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateur2.prenom,
+                  messages: ''
+                })
               }
             }
             return acc
@@ -290,6 +287,9 @@ export default {
     },
     message (data) {
       this.messages.push(data)
+    },
+    sendNotification () {
+      console.log('notification')
     }
   },
   data: () => ({
@@ -312,24 +312,6 @@ export default {
 <style scoped>
   .sheet {
     background: linear-gradient(90deg, #de268e 0%, #d57c29 100%, #d57e27 103.36%);
-  }
-
-  .Text_profile {
-    color: white;
-    font-size: 19px;
-  }
-
-  .content-profile {
-    margin: 0px !important;
-  }
-
-  .v-application .info {
-    background-color: #f5f5f5 !important;
-    border-color: #f5f5f5 !important;
-  }
-  .titre-conversation {
-    font-size: 15px;
-    font-weight: bold;
   }
   .Pas_Amis{
    font-size: 20px;

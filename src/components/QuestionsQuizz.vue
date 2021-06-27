@@ -110,13 +110,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#quizz {
-  margin-top: 20px;
-}
-
-body {
-  font-family: 'Segoe UI';
-}
 
 h3, h2 {
   text-align: center;

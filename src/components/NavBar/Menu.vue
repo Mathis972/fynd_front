@@ -3,6 +3,7 @@
     <v-navigation-drawer
       app
       width="300"
+      permanent
     >
       <v-sheet
         color="grey lighten-5"
@@ -66,7 +67,8 @@
       </v-sheet>
 
       <v-list>
-       <list-user @connect="RoomConnect" :conversations="conversations" ></list-user>
+       <list-user v-if="path =='Chat'" @connect="RoomConnect" :conversations="conversations" ></list-user>
+       <nav-profil @modif="modifProfil" v-else-if="path =='Profil'"></nav-profil>
       </v-list>
     </v-navigation-drawer>
     </div>
@@ -75,6 +77,7 @@
 <script>
 import axios from 'axios'
 import ListUser from '@/components/NavBar/ListUser'
+import NavProfil from '@/components/NavBar/NavProfil'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -84,6 +87,7 @@ export default {
   data () {
     return {
       user: {},
+      path: '',
       avatar: {},
       listMenu: [
         { title: 'Mon compte', action: 'Mon compte' },
@@ -96,8 +100,12 @@ export default {
     await this.getAvatarProfil()
     await this.$emit('userDetails', this.user)
     await this.$emit('userAvatar', this.avatar)
+    this.path = this.$route.name
   },
   methods: {
+    modifProfil: function (params) {
+      this.$emit('modif')
+    },
     RoomConnect: function (value, value2) {
       this.$emit('connectToRoom', value, value2)
     },
@@ -124,12 +132,9 @@ export default {
           this.user = res.data
         })
       return user
-    },
-    RoomConnect: function (value) {
-      this.$emit('connectToRoom', value)
     }
   },
-  components: { ListUser },
+  components: { ListUser, NavProfil },
   props: {
     conversations: Array,
     AvatarProfil: Object
@@ -140,5 +145,22 @@ export default {
 <style >
   .sheet {
     background: linear-gradient(90deg, #de268e 0%, #d57c29 100%, #d57e27 103.36%);
+  }
+    .Text_profile {
+    color: white;
+    font-size: 19px;
+  }
+
+  .content-profile {
+    margin: 0px !important;
+  }
+
+  .v-application .info {
+    background-color: #f5f5f5 !important;
+    border-color: #f5f5f5 !important;
+  }
+  .titre-conversation {
+    font-size: 15px;
+    font-weight: bold;
   }
 </style>
