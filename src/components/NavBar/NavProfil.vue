@@ -3,7 +3,7 @@
  <template>
 <v-list-item @click="modifProfil">
       <v-list-item-content >
-        <v-list-item-title  class="text-h3">Modifier mon profil</v-list-item-title>
+        <v-list-item-title  class="text-h3">{{ textModif }}</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
 
@@ -23,6 +23,9 @@
 
 <script>
 export default {
+  props: {
+    textModif: String
+  },
   data () {
     return {
     }

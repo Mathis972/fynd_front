@@ -1,7 +1,7 @@
 <template>
   <v-app>
-    <v-app-bar app flat height="65" color=" rgba(0, 0, 0, 0.87)">
-      <div style="display:flex" align="center">
+    <v-app-bar class="justify-center"   app flat height="65" color=" rgba(0, 0, 0, 0.87)">
+      <div class="justify-center"  style="display:flex" align="center">
         <b>{{ user.prenom }},
           {{ new Date(Date.now() - new Date(user.date_de_naissance).getTime()).getFullYear() - 1970 }} ans</b>
       </div>
@@ -17,12 +17,12 @@
                 Photo de profil :
               </v-card-title>
               <v-card-text class=" text-center flex-grow-1 overflow-y-auto">
-                <v-row class=" justify-center" v-if="urlImgProfil != undefined">
+                <v-row class=" justify-center" v-if="avatar != undefined">
                   <v-col style="width:50px; max-width:400px;height:500px;" width="50" height="50" cols="12">
-                    <v-img width="100%" height="100%" :src="urlImgProfil">
+                    <v-img width="100%" height="100%" :src="avatar.photo_url">
                     </v-img>
                   </v-col>
-                  <v-col>
+                  <v-col cols="12">
                     <inputForFile @file="getImgProfil" title='Modifier votre photo de profil'> </inputForFile>
                   </v-col>
                 </v-row>
@@ -60,7 +60,7 @@
                   <v-card-title class="justify-center">
                 Photos récentes :
               </v-card-title>
-                                <v-col>
+                                <v-col cols="12">
                     <inputForFile @file="getImg" title='Ajouter des photos: '> </inputForFile>
                   </v-col>
           <v-row class="mb-6" style="align-items:center">
@@ -99,15 +99,64 @@ export default {
     getImgProfil: function (file, urlImgProfil) {
       // console.log(urlImgProfil)
       console.log(file)
-      this.urlImgProfil = urlImgProfil
+      this.avatar.photo_url = urlImgProfil
       const bodyFormData = new FormData()
       bodyFormData.append('__method', 'PUT')
       bodyFormData.append('fk_utilisateur_id', this.user.id)
       bodyFormData.append('image', file)
       bodyFormData.append('est_photo_profil', true)
-      for (var value of bodyFormData.values()) {
-        console.log(value)
+      if (this.avatar === undefined) {
+        console.log('avatar trouvé')
+        axios.post(`${process.env.VUE_APP_BACK_URL}/photos_utilisateurs`, bodyFormData, {
+          header: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+          .then((r) => {
+            this.$q.notify({
+              message: 'Modification effectuer',
+              color: 'primary',
+              timeout: 1000
+            })
+          })
+          .catch(r =>
+            this.$q.notify({
+              message: 'Modification erreur',
+              color: 'primary',
+              timeout: 1000
+            })
+          )
+      } else {
+        console.log('avatar trouvé')
+        axios.put(`${process.env.VUE_APP_BACK_URL}/photos_utilisateurs/${this.avatar.id}`, bodyFormData, {
+          header: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+          .then((r) => {
+            this.$q.notify({
+              message: 'Modification effectuer',
+              color: 'primary',
+              timeout: 1000
+            })
+          })
+          .catch(r =>
+            this.$q.notify({
+              message: 'Modification erreur',
+              color: 'primary',
+              timeout: 1000
+            })
+          )
       }
+    },
+    getImg: function (file, urlImg) {
+      console.log(file)
+      const bodyFormData = new FormData()
+      bodyFormData.append('__method', 'PUT')
+      bodyFormData.append('fk_utilisateur_id', this.user.id)
+      bodyFormData.append('image', file)
+      bodyFormData.append('est_photo_profil', false)
+      console.log('avatar trouvé')
       axios.post(`${process.env.VUE_APP_BACK_URL}/photos_utilisateurs`, bodyFormData, {
         header: {
           'Content-Type': 'multipart/form-data'
@@ -127,10 +176,6 @@ export default {
             timeout: 1000
           })
         )
-    },
-    get: function (file, urlImg) {
-      console.log(urlImg)
-      this.urlImg = urlImg
     },
     getInitials: function (name) {
       let initials = name.split(' ')

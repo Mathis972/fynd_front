@@ -8,7 +8,7 @@
       style="width:50px; max-width:400px;height:500px;"
     >
       <v-img
-        :src="`https://picsum.photos/500/300?image=${n * 5 + 10}`"
+        :src="photoUser.photo_url"
        width="100%" height="100%"
         class="grey lighten-2"
       >

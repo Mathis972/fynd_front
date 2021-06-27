@@ -24,7 +24,7 @@
               color="grey darken-1"
               size="52"
             >
-              <img v-if="AvatarProfile !=undefined"
+              <img v-if="this.avatar !=undefined"
                 alt="Avatar"
                 :src="avatar.photo_url"
               >
@@ -68,7 +68,8 @@
 
       <v-list>
        <list-user v-if="path =='Chat'" @connect="RoomConnect" :conversations="conversations" ></list-user>
-       <nav-profil @modif="modifProfil" v-else-if="path =='Profil'"></nav-profil>
+       <nav-profil @modif="modifProfil" v-else-if="path =='Profil' && modif == false" textModif="Modifier profil"></nav-profil>
+       <nav-profil @modif="goProfil" v-else-if="path =='Profil' && modif == true " textModif="Revenir au profil"></nav-profil>
       </v-list>
     </v-navigation-drawer>
     </div>
@@ -106,6 +107,9 @@ export default {
     modifProfil: function (params) {
       this.$emit('modif')
     },
+    goProfil: function (params) {
+      this.$emit('GoProfil')
+    },
     RoomConnect: function (value, value2) {
       this.$emit('connectToRoom', value, value2)
     },
@@ -124,20 +128,25 @@ export default {
         // console.log(this.user)
         const user = this.user.photo_utilisateur.find(photo => photo.est_photo_profil === true)
         this.avatar = user
+        // this.avatar.photo_url = `${process.env.VUE_APP_BACK_URL}/${this.avatar.photo_url}`
       }
     },
-    getUser () {
-      const user = axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
+    async getUser () {
+      const user = await axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
         .then((res) => {
           this.user = res.data
         })
+      this.user.photo_utilisateur.forEach((value, index) => {
+        value.photo_url = `${process.env.VUE_APP_BACK_URL}/${value.photo_url}`
+      })
       return user
     }
   },
   components: { ListUser, NavProfil },
   props: {
     conversations: Array,
-    AvatarProfil: Object
+    modif: Boolean
+
   }
 }
 </script>

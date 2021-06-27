@@ -1,6 +1,6 @@
 <template>
     <div>
-      <Menu  @modif="modif=true" @userDetails="userDetails" @userAvatar="userAvatar" />
+      <Menu @GoProfil="modif=false" :modif='modif' @modif="modif=true" @userDetails="userDetails" @userAvatar="userAvatar" />
       <ModifProfil v-if="modif == true" :user="user" :avatar="avatar" />
       <DetailsProfil v-if="modif == false" :user="user" :avatar="avatar" />
     </div>

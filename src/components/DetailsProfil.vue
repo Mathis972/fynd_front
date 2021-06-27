@@ -9,7 +9,7 @@
     </v-app-bar>
     <div id='DetailsProfil'>
       <v-main style="margin:30px">
-        <v-row class="mb-6" style="align-items:center">
+        <v-row class="mb-6" >
           <v-col lg="5">
             <v-card outlined tile flat class=" justify-center pa-2 d-flex flex-column fill-height"
               style="border: 0 !important;">
@@ -17,9 +17,9 @@
                 Photo de profil :
               </v-card-title>
               <v-card-text class=" text-center flex-grow-1 overflow-y-auto">
-                <v-row class=" justify-center" v-if="urlImg != undefined">
+                <v-row class=" justify-center" v-if="avatar != undefined">
                   <v-col style="width:50px; max-width:400px;height:500px;" width="50" height="50" cols="12">
-                    <v-img width="100%" height="100%" :src="urlImg">
+                    <v-img width="100%" height="100%" :src="avatar.photo_url">
                     </v-img>
                   </v-col>
                 </v-row>
@@ -34,14 +34,27 @@
             </v-card>
           </v-col>
           <v-col>
-            <v-card outlined tile flat class="pa-2 d-flex flex-column fill-height" style="border: 0 !important;">
-              <v-card-text class="flex-grow-1 overflow-y-auto">
-                <h2>Description :</h2>
-                <br>
-                <p>{{ user.biographie }}</p>
+            <v-card outlined tile flat class=" d-flex flex-column " style="border: 0 !important;">
+            <v-card-title class="justify-center">
+              </v-card-title>
+            <v-card-title class="justify-center mb-11">
+                Votre profil:
+              </v-card-title>
+              <v-card-text class="flex-grow-1 ">
+                <div v-if="user.biographie !== null ">
+                <p >{{ user.biographie }}</p>
+                </div>
+                <div v-else >
+                <v-row>
+                   <v-icon large color=" darken-2" >
+     mdi-format-quote-open
+    </v-icon>
+                <v-col class="text-h5"> pas de description pour le moment… </v-col>
+                </v-row>
+                </div>
               </v-card-text>
               <v-divider></v-divider>
-              <v-card-text class="flex-grow-1 overflow-y-auto">
+              <v-card-text class="flex-grow-1 ">
                 <h2>Personnalité :</h2>
                 <br>
                 <li v-for="item in personnalite" :key="item.question.id">
