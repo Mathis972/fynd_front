@@ -47,8 +47,8 @@
                 <div v-else >
                 <v-row>
                    <v-icon large color=" darken-2" >
-     mdi-format-quote-open
-    </v-icon>
+                     mdi-format-quote-open
+                    </v-icon>
                 <v-col class="text-h5"> pas de description pour le moment… </v-col>
                 </v-row>
                 </div>

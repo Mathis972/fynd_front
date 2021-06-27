@@ -7,9 +7,9 @@
       </v-list-item-content>
     </v-list-item>
 
-    <v-list-item >
+    <v-list-item  @click="retourChat" >
       <v-list-item-content>
-        <v-list-item-title  class="text-h3">Modifier ses réponses</v-list-item-title>
+        <v-list-item-title  class="text-h3">Retour au chat</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
     <v-list-item @click="deconnexion">
@@ -31,6 +31,9 @@ export default {
     }
   },
   methods: {
+    retourChat: function () {
+      this.$router.push({ name: 'Chat' })
+    },
     modifProfil: function () {
       this.$emit('modif')
     }

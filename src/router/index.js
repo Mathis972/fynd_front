@@ -27,7 +27,7 @@ const routes = [
     component: Quizz
   },
   {
-    path: '/profil',
+    path: '/monprofil',
     name: 'Profil',
     component: Profil
   },

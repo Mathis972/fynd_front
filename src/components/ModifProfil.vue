@@ -9,7 +9,7 @@
     </v-app-bar>
     <div id='DetailsProfil'>
       <v-main style="margin:30px">
-        <v-row class="mb-6" style="align-items:center">
+        <v-row  >
           <v-col lg="5">
             <v-card outlined tile flat class=" justify-center pa-2 d-flex flex-column fill-height"
               style="border: 0 !important;">
@@ -23,7 +23,7 @@
                     </v-img>
                   </v-col>
                   <v-col cols="12">
-                    <inputForFile @file="getImgProfil" title='Modifier votre photo de profil'> </inputForFile>
+                    <inputForFile @file="getImgProfil" idInput="profil" forInput="profil" title='Modifier votre photo de profil'> </inputForFile>
                   </v-col>
                 </v-row>
                 <v-row v-else>
@@ -33,21 +33,33 @@
                     </v-avatar>
                   </v-col>
                   <v-col>
-                    <inputForFile @file="getImgProfil" title='Ajouter une photo de profil:'> </inputForFile>
+                    <inputForFile @file="getImgProfil" idInput="profil" forInput="profil" title='Ajouter une photo de profil:'> </inputForFile>
                   </v-col>
                 </v-row>
               </v-card-text>
             </v-card>
           </v-col>
-          <v-col>
-            <v-card outlined tile flat class="pa-2 d-flex flex-column fill-height" style="border: 0 !important;">
-              <v-card-text class="flex-grow-1 overflow-y-auto">
-                <h2>Description :</h2>
-                <br>
-                <v-text-field v-model="user.biographie"> </v-text-field>
+                   <v-col>
+            <v-card outlined tile flat class=" d-flex flex-column " style="border: 0 !important;">
+            <v-card-title class="justify-center">
+              </v-card-title>
+            <v-card-title class="justify-center mb-11">
+                Votre profil:
+              </v-card-title>
+              <v-card-text class="flex-grow-1 ">
+                <div v-if="user.biographie !== null ">
+                <p >{{ user.biographie }}</p>
+                </div>
+                <div v-else >
+                <v-row>
+                <v-col class="text-h5">
+                  <v-text-field v-model="user.biographie" placeholder="Decrivez-vous !"></v-text-field>
+                   </v-col>
+                </v-row>
+                </div>
               </v-card-text>
               <v-divider></v-divider>
-              <v-card-text class="flex-grow-1 overflow-y-auto">
+              <v-card-text class="flex-grow-1 ">
                 <h2>Personnalité :</h2>
                 <br>
                 <li v-for="item in personnalite" :key="item.question.id">
@@ -57,15 +69,19 @@
             </v-card>
           </v-col>
         </v-row>
+        <v-row>
+        <v-col cols="6">
                   <v-card-title class="justify-center">
                 Photos récentes :
               </v-card-title>
-                                <v-col cols="12">
-                    <inputForFile @file="getImg" title='Ajouter des photos: '> </inputForFile>
+              </v-col>
+              <v-col cols="6">
+                    <inputForFile  idInput="listImage" forInput="listImage" @files="getImg" title='Ajouter des photos:'> </inputForFile>
                   </v-col>
-          <v-row class="mb-6" style="align-items:center">
-            <grid-picture :photoUser="user.photo_utilisateur"></grid-picture>
-          </v-row>
+          <v-col  class="mb-6" style="align-items:center">
+            <grid-picture :modif="modif" :photoUser="user.photo_utilisateur"></grid-picture>
+          </v-col>
+        </v-row>
       </v-main>
     </div>
   </v-app>
@@ -83,6 +99,7 @@ export default {
   name: 'DetailsProfil',
   props: {
     user: Object,
+    modif: Boolean,
     avatar: Object
   },
   async created () {
@@ -163,6 +180,7 @@ export default {
         }
       })
         .then((r) => {
+          this.$emit('refreshUser')
           this.$q.notify({
             message: 'Modification effectuer',
             color: 'primary',

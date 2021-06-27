@@ -76,20 +76,24 @@
 </template>
 
 <script>
-import axios from 'axios'
 import ListUser from '@/components/NavBar/ListUser'
 import NavProfil from '@/components/NavBar/NavProfil'
 import { mapGetters } from 'vuex'
 
 export default {
+  props: {
+    conversations: Array,
+    modif: Boolean,
+    user: Object,
+    avatar: Object
+
+  },
   computed: {
     ...mapGetters(['user_Id'])
   },
   data () {
     return {
-      user: {},
       path: '',
-      avatar: {},
       listMenu: [
         { title: 'Mon compte', action: 'Mon compte' },
         { title: 'Déconnexion', action: 'deconnexion' }
@@ -97,10 +101,6 @@ export default {
     }
   },
   async created () {
-    await this.getUser()
-    await this.getAvatarProfil()
-    await this.$emit('userDetails', this.user)
-    await this.$emit('userAvatar', this.avatar)
     this.path = this.$route.name
   },
   methods: {
@@ -114,40 +114,16 @@ export default {
       this.$emit('connectToRoom', value, value2)
     },
     menuActionClick (action) {
-      if (action === 'Mon Compte') {
-        alert('TEST!!')
+      console.log(action)
+      if (action === 'Mon compte') {
+        this.$router.push({ name: 'Profil' })
       } else if (action === 'deconnexion') {
         this.$store.dispatch('logOut')
         this.$router.push({ name: 'Connexion' })
       }
-    },
-    getAvatarProfil () {
-      if (!this.user) {
-        return ''
-      } else {
-        // console.log(this.user)
-        const user = this.user.photo_utilisateur.find(photo => photo.est_photo_profil === true)
-        this.avatar = user
-        // this.avatar.photo_url = `${process.env.VUE_APP_BACK_URL}/${this.avatar.photo_url}`
-      }
-    },
-    async getUser () {
-      const user = await axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
-        .then((res) => {
-          this.user = res.data
-        })
-      this.user.photo_utilisateur.forEach((value, index) => {
-        value.photo_url = `${process.env.VUE_APP_BACK_URL}/${value.photo_url}`
-      })
-      return user
     }
   },
-  components: { ListUser, NavProfil },
-  props: {
-    conversations: Array,
-    modif: Boolean
-
-  }
+  components: { ListUser, NavProfil }
 }
 </script>
 
