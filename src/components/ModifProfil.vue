@@ -116,7 +116,7 @@ export default {
     getImgProfil: function (file, urlImgProfil) {
       // console.log(urlImgProfil)
       console.log(file)
-      this.avatar.photo_url = urlImgProfil
+      const self = this
       const bodyFormData = new FormData()
       bodyFormData.append('__method', 'PUT')
       bodyFormData.append('fk_utilisateur_id', this.user.id)
@@ -130,19 +130,20 @@ export default {
           }
         })
           .then((r) => {
-            this.$q.notify({
+            self.$q.notify({
               message: 'Modification effectuer',
               color: 'primary',
               timeout: 1000
             })
           })
           .catch(r =>
-            this.$q.notify({
+            self.$q.notify({
               message: 'Modification erreur',
               color: 'primary',
               timeout: 1000
             })
           )
+        this.$emit('refreshUser')
       } else {
         console.log('avatar trouvé')
         axios.put(`${process.env.VUE_APP_BACK_URL}/photos_utilisateurs/${this.avatar.id}`, bodyFormData, {
@@ -151,6 +152,7 @@ export default {
           }
         })
           .then((r) => {
+            this.$emit('refreshUser')
             this.$q.notify({
               message: 'Modification effectuer',
               color: 'primary',

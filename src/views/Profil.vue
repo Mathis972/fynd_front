@@ -34,8 +34,10 @@ export default {
     }
   },
   methods: {
-    refreshUser: function () {
-      this.getUser()
+    refreshUser: async function () {
+      console.log('je suis refresh')
+      await this.getUser()
+      await this.getAvatarProfil()
     },
     getAvatarProfil () {
       console.log('tototo')
