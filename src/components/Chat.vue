@@ -2,33 +2,36 @@
   <v-app
     id="inspire"
   >
-  <Modal :dialog="dialog" @close="dialog=false" ></Modal>
+  <!-- <Modal :dialog="dialog" @close="dialog=false" ></Modal> -->
     <v-app-bar
       app
       flat
       height="65"
       color=" rgba(0, 0, 0, 0.87)"
     >
+      <v-list-item  @click="goProfileUserTalk" >
       <div
         style="display:flex"
         align="center"
       >
-        <v-avatar
-          class=""
-          color="grey darken-1"
-          size="52"
-        >
-          <img v-if="userTalk.photo !== '' "
-            alt="Avatar"
-            :src="userTalk.photo"
+          <v-avatar
+          @click="goProfileUserTalk"
+            class=""
+            color="grey darken-1"
+            size="52"
           >
-          <span v-else class="white--text "> {{ userTalk.initiale }} </span>
-        </v-avatar>
-          <span class="user">{{ userTalk.prenom }}</span>
-      </div>
+            <img v-if="userTalk.photo !== '' "
+              alt="Avatar"
+              :src="userTalk.photo"
+            >
+            <span v-else class="white--text "> {{ userTalk.initiale }} </span>
+          </v-avatar>
+            <span class="user">{{ userTalk.prenom }}</span>
+        </div>
+      </v-list-item >
+
       <v-spacer></v-spacer>
           <v-btn @click="nextPersonne"> Next </v-btn>
-          <v-btn @click="dialog=true"> dialog </v-btn>
           <!-- <span class="time">{{ time }}</span> -->
     </v-app-bar>
 <Menu :avatar="avatar" :user="user" @connectToRoom="connectToRoom" :conversations="conversations"  ></Menu>
@@ -49,10 +52,11 @@
                 color="grey darken-1"
                 size="52"
               >
-                <img
-                  alt="Avatar"
-                  :src="userTalk.photo"
-                >
+            <img v-if="userTalk.photo !== '' "
+              alt="Avatar"
+              :src="userTalk.photo"
+            >
+            <span v-else class="white--text "> {{ userTalk.initiale }} </span>
               </v-avatar>
               <template>
 
@@ -108,7 +112,7 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import axios from 'axios'
 import Menu from './NavBar/Menu'
-import Modal from '@/components/modal'
+// import Modal from '@/components/modal'
 import VueSocketIOExt from 'vue-socket.io-extended'
 import io from 'socket.io-client'
 Vue.config.productionTip = false
@@ -117,7 +121,7 @@ const socketConnection = io(`${process.env.VUE_APP_BACK_URL}`)
 
 Vue.use(VueSocketIOExt, socketConnection)
 export default {
-  components: { Menu, Modal },
+  components: { Menu },
   async created () {
     await this.idLaunch()
     await this.recupConv()
@@ -129,6 +133,9 @@ export default {
     ...mapGetters(['user_Id'])
   },
   methods: {
+    goProfileUserTalk: function () {
+      this.$router.push({ name: 'ProfilTalk', params: this.userTalk })
+    },
     getUserAfterRefresh: async function () {
       const self = this
       if (localStorage.getItem('userTalk') === null && localStorage.getItem('conversationId')) {

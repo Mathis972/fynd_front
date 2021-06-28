@@ -6,7 +6,7 @@
       <template v-for="(conversationsListe) in conversations">
         <v-divider :key="conversationsListe.conversations_id"></v-divider>
         <v-list-item @click="connectToRoom(conversationsListe)" :key="conversationsListe.prenom">
-          <v-list-item-avatar v-if="conversationsListe.photo == undefined" color="#EC407A">
+          <v-list-item-avatar class="justify-center" v-if="conversationsListe.photo == undefined" color="#EC407A">
            <span class="white--text "> {{ getInitials(conversationsListe.prenom) }} </span>
           </v-list-item-avatar>
           <v-list-item-avatar v-else>
