@@ -2,7 +2,7 @@
   <div>
     <v-subheader class="titre-conversation">Mes amis sauvegardées </v-subheader>
     <v-divider></v-divider>
-    <template v-if="conversations.length > 0">
+    <template v-if="conversations && conversations.length > 0">
       <template v-for="(conversationsListe) in conversations">
         <v-divider :key="conversationsListe.conversations_id"></v-divider>
         <v-list-item @click="connectToRoom(conversationsListe)" :key="conversationsListe.prenom">

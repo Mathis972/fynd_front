@@ -1,5 +1,5 @@
 <template>
-  <v-row v-if="photoUser.length != 0" class=" justify-center">
+  <v-row v-if=" photoUser && photoUser.length != 0" class=" justify-center">
     <v-col
       v-for="photoUser in photoUser"
       :key="photoUser.id"
@@ -14,7 +14,7 @@
         class="grey lighten-2"
       >
        <v-card-title v-if="modif== true" class="align-end fill-height" primary-title>
-            <v-btn  rounded style="z-index: 9999;background-color:none" v-on:click.stop="action2">
+            <v-btn  rounded style="z-index: 9999;background-color:none" @click="deleted(photoUser.id)">
     <v-icon large color=" red" >
      mdi-delete
     </v-icon></v-btn>
@@ -31,15 +31,18 @@
       </v-card>
     </v-col>
   </v-row>
-   <v-row v-else class=" justify-center">
-     <v-title class="mt-6">
-       Vous n'avez aucune photos...
-     </v-title>
+   <v-row v-else class=" justify-center mb-6">
+       <p class="mt-5">Vous n'avez aucune photos...</p>
    </v-row>
 </template>
 
 <script>
 export default {
+  methods: {
+    deleted: function (value) {
+      this.$emit('deleteItem', value)
+    }
+  },
   props: {
     modif: Boolean,
     photoUser: Array

@@ -79,7 +79,7 @@
                     <inputForFile  idInput="listImage" forInput="listImage" @files="getImg" title='Ajouter des photos:'> </inputForFile>
                   </v-col>
           <v-col  class="mb-6" style="align-items:center">
-            <grid-picture :modif="modif" :photoUser="user.photo_utilisateur"></grid-picture>
+            <grid-picture @deleteItem="deleted" :modif="modif" :photoUser="user.photo_utilisateur"></grid-picture>
           </v-col>
         </v-row>
       </v-main>
@@ -120,7 +120,7 @@ export default {
       const bodyFormData = new FormData()
       bodyFormData.append('__method', 'PUT')
       bodyFormData.append('fk_utilisateur_id', this.user.id)
-      bodyFormData.append('image', file)
+      bodyFormData.append('upl', file)
       bodyFormData.append('est_photo_profil', true)
       if (this.avatar === undefined) {
         console.log('avatar trouvé')
@@ -130,6 +130,7 @@ export default {
           }
         })
           .then((r) => {
+            this.$emit('refreshUser')
             self.$q.notify({
               message: 'Modification effectuer',
               color: 'primary',
@@ -173,9 +174,10 @@ export default {
       const bodyFormData = new FormData()
       bodyFormData.append('__method', 'PUT')
       bodyFormData.append('fk_utilisateur_id', this.user.id)
-      bodyFormData.append('image', file)
+      bodyFormData.append('upl', file)
       bodyFormData.append('est_photo_profil', false)
       console.log('avatar trouvé')
+      console.log(bodyFormData)
       axios.post(`${process.env.VUE_APP_BACK_URL}/photos_utilisateurs`, bodyFormData, {
         header: {
           'Content-Type': 'multipart/form-data'
@@ -183,19 +185,18 @@ export default {
       })
         .then((r) => {
           this.$emit('refreshUser')
-          this.$q.notify({
-            message: 'Modification effectuer',
-            color: 'primary',
-            timeout: 1000
-          })
         })
         .catch(r =>
-          this.$q.notify({
-            message: 'Modification erreur',
-            color: 'primary',
-            timeout: 1000
-          })
+          console.log(r)
         )
+    },
+    deleted: async function (id) {
+      console.log(id)
+      await axios.delete(`${process.env.VUE_APP_BACK_URL}/photos_utilisateurs/${id}`)
+        .then((r) => {
+          this.$emit('refreshUser')
+          console.log('delete')
+        })
     },
     getInitials: function (name) {
       let initials = name.split(' ')

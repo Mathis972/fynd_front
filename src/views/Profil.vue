@@ -60,9 +60,9 @@ export default {
         .catch((value) => {
           console.err(value)
         })
-      this.user.photo_utilisateur.forEach((value, index) => {
-        value.photo_url = `${process.env.VUE_APP_BACK_URL}/${value.photo_url}`
-      })
+      // this.user.photo_utilisateur.forEach((value, index) => {
+      //   value.photo_url = `${process.env.VUE_APP_BACK_URL}/${value.photo_url}`
+      // })
     }
     // userDetails (user) {
     //   this.user = user

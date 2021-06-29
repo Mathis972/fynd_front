@@ -31,6 +31,10 @@ export default {
     }
   },
   methods: {
+    deconnexion: function () {
+      this.$store.dispatch('logOut')
+      this.$router.push({ name: 'Connexion' })
+    },
     retourChat: function () {
       this.$router.push({ name: 'Chat' })
     },
