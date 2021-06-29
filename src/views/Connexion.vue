@@ -27,7 +27,7 @@
         </v-col>
         <v-col v-if="ifRegister" cols="12">
           <v-form class="form-connexion">
-            <v-text-field v-model="emailLogin" label="Email" color="#FFFFFF" required append-icon="mdi-email-outline"
+            <v-text-field v-model="emailLogin" label="Email" color="pink lighten-5" required append-icon="mdi-email-outline"
               class="text-field"></v-text-field>
 
             <v-text-field v-model="mot_de_passeLogin" label="Mot de passe" required color="pink lighten-5"
@@ -45,13 +45,13 @@
         </v-col>
         <v-col v-else>
           <v-form class="form-connexion">
-            <v-text-field v-model="prenomRegister" label="Prénom" required color="#FFFFFF"
+            <v-text-field v-model="prenomRegister" label="Prénom" required color="pink lighten-5"
               append-icon="mdi-account-outline" class="text-field"></v-text-field>
-            <v-text-field v-model="emailRegister" label="Email" required color="#FFFFFF" append-icon="mdi-email-outline"
+            <v-text-field v-model="emailRegister" label="Email" required color="pink lighten-5" append-icon="mdi-email-outline"
               class="text-field"></v-text-field>
-            <v-text-field v-model="mot_de_passeRegister" label="Mot de passe" required type="password" color="#FFFFFF"
+            <v-text-field v-model="mot_de_passeRegister" label="Mot de passe" required type="password" color="pink lighten-5"
               append-icon="mdi-lock-outline" class="text-field"></v-text-field>
-            <v-text-field v-model="DateNaissance" type="date" class="text-field"></v-text-field>
+            <v-text-field v-model="DateNaissance" color="pink lighten-5" type="date" class="text-field"></v-text-field>
             <v-col cols="12">
               <v-btn align-center dark justify-center @click="register" color="#F06292" :style="{color:'#FFFFF'}">
                 S'inscrire

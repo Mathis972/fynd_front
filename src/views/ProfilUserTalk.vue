@@ -1,27 +1,30 @@
 <template>
     <div>
-      <Menu  @GoProfil="modif=false" :modif='modif' @modif="modif=true" :user="user" :avatar="avatar" />
-      <ModifProfil  :modif="modif" @refreshUser="refreshUser" v-if="modif == true" :user="user" :avatar="avatar" />
-      <DetailsProfil v-if="modif == false" :user="user" :avatar="avatar" />
+      <Menu  :initial="initial" :user="user" :avatar="avatar" />
+      <DetailsProfilTalk :initial="initial" :user="user" :avatar="avatar" />
     </div>
 </template>
 
 <script>
-import DetailsProfil from '../components/DetailsProfil'
+import DetailsProfilTalk from '../components/DetailsProfilTalk'
 import Menu from '../components/NavBar/Menu'
 import { mapGetters } from 'vuex'
-import ModifProfil from '@/components/ModifProfil'
 import axios from 'axios'
 export default {
-  async mounted () {
+  async created () {
+    if (this.$route.params.id === undefined) {
+      this.$router.push({ name: 'Chat' })
+    }
     await this.getUser()
     await this.getAvatarProfil()
+    console.log(this.$route.params.id)
   },
-  name: 'Profil',
+  async mounted () {
+  },
+  name: 'ProfilUserTalk',
   components: {
-    DetailsProfil,
-    Menu,
-    ModifProfil
+    DetailsProfilTalk,
+    Menu
   },
   computed: {
     ...mapGetters(['user_Id'])
@@ -30,17 +33,24 @@ export default {
     return {
       modif: false,
       user: {},
-      avatar: {}
+      avatar: {},
+      initial: ''
     }
   },
   methods: {
-    refreshUser: async function () {
-      console.log('je suis refresh')
-      await this.getUser()
-      await this.getAvatarProfil()
+    getInitials: function (name) {
+      let initials = name.split(' ')
+      if (initials.length > 1) {
+        initials = initials.shift().charAt(0) + initials.pop().charAt(0)
+      } else {
+        initials = name.substring(0, 2)
+      }
+      this.initial = initials.toUpperCase()
+    },
+    refreshUser: function () {
+      this.getUser()
     },
     getAvatarProfil () {
-      console.log('tototo')
       if (!this.user) {
         return ''
       } else {
@@ -51,8 +61,7 @@ export default {
       }
     },
     async getUser () {
-      console.log('tototo')
-      await axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
+      await axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.$route.params.id}`)
         .then((res) => {
           console.log(res)
           this.user = res.data
@@ -60,9 +69,6 @@ export default {
         .catch((value) => {
           console.err(value)
         })
-      // this.user.photo_utilisateur.forEach((value, index) => {
-      //   value.photo_url = `${process.env.VUE_APP_BACK_URL}/${value.photo_url}`
-      // })
     }
     // userDetails (user) {
     //   this.user = user

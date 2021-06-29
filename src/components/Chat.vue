@@ -2,37 +2,39 @@
   <v-app
     id="inspire"
   >
-  <Modal :dialog="dialog" @close="dialog=false" ></Modal>
+  <!-- <Modal :dialog="dialog" @close="dialog=false" ></Modal> -->
     <v-app-bar
       app
-      clipped-right
       flat
-      height="72"
+      height="65"
       color=" rgba(0, 0, 0, 0.87)"
     >
+      <v-list-item  @click="goProfileUserTalk" >
       <div
         style="display:flex"
         align="center"
       >
-        <v-avatar
-          class=""
-          color="grey darken-1"
-          size="52"
-        >
-          <img v-if="userTalk.photo !== '' "
-            alt="Avatar"
-            :src="userTalk.photo"
+          <v-avatar
+          @click="goProfileUserTalk"
+            class=""
+            color="grey darken-1"
+            size="52"
           >
-          <span v-else class="white--text "> {{ userTalk.initiale }} </span>
-        </v-avatar>
-          <span class="user">{{ userTalk.prenom }}</span>
-      </div>
+            <img v-if="userTalk.photo !== '' "
+              alt="Avatar"
+              :src="userTalk.photo"
+            >
+            <span v-else class="white--text "> {{ userTalk.initiale }} </span>
+          </v-avatar>
+            <span class="user">{{ userTalk.prenom }}</span>
+        </div>
+      </v-list-item >
+
       <v-spacer></v-spacer>
           <v-btn @click="nextPersonne"> Next </v-btn>
-          <v-btn @click="dialog=true"> dialog </v-btn>
           <!-- <span class="time">{{ time }}</span> -->
     </v-app-bar>
-<Menu @connectToRoom="connectToRoom" :conversations="conversations"  ></Menu>
+<Menu :avatar="avatar"  :initial="initialUser" :user="user" @connectToRoom="connectToRoom" :conversations="conversations"  ></Menu>
     <v-main>
       <v-card
         flat
@@ -50,10 +52,11 @@
                 color="grey darken-1"
                 size="52"
               >
-                <img
-                  alt="Avatar"
-                  :src="userTalk.photo"
-                >
+            <img v-if="userTalk.photo !== '' "
+              alt="Avatar"
+              :src="userTalk.photo"
+            >
+            <span v-else class="white--text "> {{ userTalk.initiale }} </span>
               </v-avatar>
               <template>
 
@@ -109,7 +112,7 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import axios from 'axios'
 import Menu from './NavBar/Menu'
-import Modal from '@/components/modal'
+// import Modal from '@/components/modal'
 import VueSocketIOExt from 'vue-socket.io-extended'
 import io from 'socket.io-client'
 Vue.config.productionTip = false
@@ -118,23 +121,36 @@ const socketConnection = io(`${process.env.VUE_APP_BACK_URL}`)
 
 Vue.use(VueSocketIOExt, socketConnection)
 export default {
-  components: { Menu, Modal },
+  components: { Menu },
   async created () {
     await this.idLaunch()
     await this.recupConv()
     await this.getUserAfterRefresh()
+    await this.getUser()
+    await this.getAvatarProfil()
   },
   computed: {
     ...mapGetters(['user_Id'])
   },
   methods: {
+    getInitials: function (name) {
+      let initials = name.split(' ')
+      if (initials.length > 1) {
+        initials = initials.shift().charAt(0) + initials.pop().charAt(0)
+      } else {
+        initials = name.substring(0, 2)
+      }
+      return initials.toUpperCase()
+    },
+    goProfileUserTalk: function () {
+      this.$router.push({ name: 'ProfilTalk', params: this.userTalk })
+    },
     getUserAfterRefresh: async function () {
       const self = this
       if (localStorage.getItem('userTalk') === null && localStorage.getItem('conversationId')) {
         this.userTalk = {}
       } else {
         this.userTalk = JSON.parse(localStorage.getItem('userTalk'))
-        console.log(JSON.parse(localStorage.getItem('userTalk')))
         this.conversations_id = parseInt(localStorage.getItem('conversationId'))
         await axios.get(`${process.env.VUE_APP_BACK_URL}/messages`, { params: { conversation_id: this.conversations_id } })
           .then((value) => {
@@ -149,14 +165,10 @@ export default {
         .then((r) => {
           return r.data
         })
-      console.log(userMatch)
       this.arrayMatch = userMatch
-      console.log(this.arrayMatch[0].util2)
       const idUserTalk = this.arrayMatch[0].util2
       await axios.post(`${process.env.VUE_APP_BACK_URL}/conversations`, { fk_utilisateur1_id: parseInt(this.user_Id), fk_utilisateur2_id: this.arrayMatch[0].util2 })
         .then((r) => {
-          console.log(r)
-          console.log(r.data)
           axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${idUserTalk}`)
             .then(r => {
               this.userTalk = r.data
@@ -170,11 +182,9 @@ export default {
       return userMatch
     },
     checkUser (data) {
-      console.log(data)
       if ((data.conversation.fk_utilisateur1_id === parseInt(this.user_Id) && data.send_by_user1 && !this.userTalk.est_user_1) || (data.conversation.fk_utilisateur2_id === parseInt(this.user_Id) && !data.send_by_user1 && this.userTalk.est_user_1)) {
         return true
       } else {
-        console.log(data.conversation.fk_utilisateur1_id, this.user_Id, data.send_by_user1, this.userTalk.est_user_1)
         return false
       }
     },
@@ -183,52 +193,49 @@ export default {
       const recup = await axios.get(`${process.env.VUE_APP_BACK_URL}/conversations/utilisateur/${this.user_Id}`)
         .then((r) => {
           this.conversations = r.data.reduce((acc, curr) => {
-            console.log(curr.est_enregistre)
-            if (curr.est_enregistre === true) {
-              if (curr.fk_utilisateur1_id !== JSON.parse(this.user_Id)) {
-                if (curr.message.length > 0) {
-                  acc.push({
-                    est_user_1: true,
-                    conversations_id: curr.id,
-                    id: curr.fk_utilisateur1_id,
-                    photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                    prenom: curr.utilisateurs1.prenom,
-                    messages: curr.message.reduce((a, b) => {
-                      return new Date(a.created_date) > new Date(b.created_date) ? a : b
-                    })
+            if (curr.fk_utilisateur1_id !== JSON.parse(this.user_Id)) {
+              if (curr.message.length > 0) {
+                acc.push({
+                  est_user_1: true,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur1_id,
+                  photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateurs1.prenom,
+                  messages: curr.message.reduce((a, b) => {
+                    return new Date(a.created_date) > new Date(b.created_date) ? a : b
                   })
-                } else {
-                  acc.push({
-                    est_user_1: true,
-                    conversations_id: curr.id,
-                    id: curr.fk_utilisateur1_id,
-                    photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                    prenom: curr.utilisateurs1.prenom,
-                    messages: ''
-                  })
-                }
+                })
               } else {
-                if (curr.message.length > 0) {
-                  acc.push({
-                    est_user_1: false,
-                    conversations_id: curr.id,
-                    id: curr.fk_utilisateur2_id,
-                    photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                    prenom: curr.utilisateur2.prenom,
-                    messages: curr.message.reduce((a, b) => {
-                      return new Date(a.created_date) > new Date(b.created_date) ? a : b
-                    })
+                acc.push({
+                  est_user_1: true,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur1_id,
+                  photo: curr.utilisateurs1.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateurs1.prenom,
+                  messages: ''
+                })
+              }
+            } else {
+              if (curr.message.length > 0) {
+                acc.push({
+                  est_user_1: false,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur2_id,
+                  photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateur2.prenom,
+                  messages: curr.message.reduce((a, b) => {
+                    return new Date(a.created_date) > new Date(b.created_date) ? a : b
                   })
-                } else {
-                  acc.push({
-                    est_user_1: false,
-                    conversations_id: curr.id,
-                    id: curr.fk_utilisateur2_id,
-                    photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
-                    prenom: curr.utilisateur2.prenom,
-                    messages: ''
-                  })
-                }
+                })
+              } else {
+                acc.push({
+                  est_user_1: false,
+                  conversations_id: curr.id,
+                  id: curr.fk_utilisateur2_id,
+                  photo: curr.utilisateur2.photo_utilisateur.find(photo => photo.est_photo_profil === true),
+                  prenom: curr.utilisateur2.prenom,
+                  messages: ''
+                })
               }
             }
             return acc
@@ -236,16 +243,27 @@ export default {
         })
       return recup
     },
-    getUser () {
-      const user = axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
+    getAvatarProfil () {
+      if (!this.user) {
+        return ''
+      } else {
+        const user = this.user.photo_utilisateur.find(photo => photo.est_photo_profil === true)
+        this.avatar = user
+        // this.avatar.photo_url = `${process.env.VUE_APP_BACK_URL}/${this.avatar.photo_url}`
+      }
+    },
+    async getUser () {
+      await axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${this.user_Id}`)
         .then((res) => {
           this.user = res.data
         })
-      return user
+        .catch((value) => {
+          console.err(value)
+        })
+      this.initialUser = this.getInitials(this.user.prenom)
     },
     async connectToRoom (utilisateur, initial) {
       this.messages = ''
-      console.log(initial)
       this.conversations_id = utilisateur.conversations_id
       this.userTalk = {
         est_user_1: utilisateur.est_user_1,
@@ -272,7 +290,6 @@ export default {
       }
       await axios.post(`${process.env.VUE_APP_BACK_URL}/messages`, message)
         .then((r) => {
-          // console.log(r)
           this.$socket.client.emit('message', r.data)
         }).catch((value) => {
         })
@@ -290,6 +307,9 @@ export default {
     },
     message (data) {
       this.messages.push(data)
+    },
+    sendNotification () {
+      console.log('notification')
     }
   },
   data: () => ({
@@ -299,11 +319,14 @@ export default {
     photoProfilUser: {},
     arrayMatch: {},
     id: '',
+    initialUser: '',
     inputMessages: '',
     messages: [],
     conversations_id: undefined,
     conversations: undefined,
-    drawer: null
+    drawer: null,
+    user: {},
+    avatar: {}
   })
 }
 
@@ -312,24 +335,6 @@ export default {
 <style scoped>
   .sheet {
     background: linear-gradient(90deg, #de268e 0%, #d57c29 100%, #d57e27 103.36%);
-  }
-
-  .Text_profile {
-    color: white;
-    font-size: 19px;
-  }
-
-  .content-profile {
-    margin: 0px !important;
-  }
-
-  .v-application .info {
-    background-color: #f5f5f5 !important;
-    border-color: #f5f5f5 !important;
-  }
-  .titre-conversation {
-    font-size: 15px;
-    font-weight: bold;
   }
   .Pas_Amis{
    font-size: 20px;

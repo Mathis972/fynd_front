@@ -4,6 +4,7 @@ import store from '../store/user'
 // import Connexion from '../views/Connexion.vue'
 import Quizz from '../views/Quizz.vue'
 import Profil from '../views/Profil.vue'
+import ProfilUserTalk from '../views/ProfilUserTalk.vue'
 
 Vue.use(VueRouter)
 
@@ -24,12 +25,20 @@ const routes = [
   {
     path: '/quizz',
     name: 'Quizz',
-    component: Quizz
+    component: Quizz,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
-    path: '/profil',
+    path: '/monprofil',
     name: 'Profil',
     component: Profil
+  },
+  {
+    path: '/profiltalk',
+    name: 'ProfilTalk',
+    component: ProfilUserTalk
   },
   {
     path: '/about',
