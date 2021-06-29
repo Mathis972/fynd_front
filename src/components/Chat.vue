@@ -34,7 +34,7 @@
           <v-btn @click="nextPersonne"> Next </v-btn>
           <!-- <span class="time">{{ time }}</span> -->
     </v-app-bar>
-<Menu :avatar="avatar" :user="user" @connectToRoom="connectToRoom" :conversations="conversations"  ></Menu>
+<Menu :avatar="avatar"  :initial="initialUser" :user="user" @connectToRoom="connectToRoom" :conversations="conversations"  ></Menu>
     <v-main>
       <v-card
         flat
@@ -133,6 +133,15 @@ export default {
     ...mapGetters(['user_Id'])
   },
   methods: {
+    getInitials: function (name) {
+      let initials = name.split(' ')
+      if (initials.length > 1) {
+        initials = initials.shift().charAt(0) + initials.pop().charAt(0)
+      } else {
+        initials = name.substring(0, 2)
+      }
+      return initials.toUpperCase()
+    },
     goProfileUserTalk: function () {
       this.$router.push({ name: 'ProfilTalk', params: this.userTalk })
     },
@@ -251,6 +260,7 @@ export default {
         .catch((value) => {
           console.err(value)
         })
+      this.initialUser = this.getInitials(this.user.prenom)
     },
     async connectToRoom (utilisateur, initial) {
       this.messages = ''
@@ -309,6 +319,7 @@ export default {
     photoProfilUser: {},
     arrayMatch: {},
     id: '',
+    initialUser: '',
     inputMessages: '',
     messages: [],
     conversations_id: undefined,

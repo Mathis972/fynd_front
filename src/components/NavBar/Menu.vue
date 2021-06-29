@@ -28,6 +28,7 @@
                 alt="Avatar"
                 :src="avatar.photo_url"
               >
+              <span v-else class="white--text "> {{ initial }} </span>
             </v-avatar>
           </v-col>
           <v-col
@@ -85,7 +86,8 @@ export default {
     conversations: Array,
     modif: Boolean,
     user: Object,
-    avatar: Object
+    avatar: Object,
+    initial: String
 
   },
   computed: {

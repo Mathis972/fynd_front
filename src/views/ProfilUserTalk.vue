@@ -1,7 +1,7 @@
 <template>
     <div>
-      <Menu  :user="user" :avatar="avatar" />
-      <DetailsProfilTalk :user="user" :avatar="avatar" />
+      <Menu  :initial="initial" :user="user" :avatar="avatar" />
+      <DetailsProfilTalk :initial="initial" :user="user" :avatar="avatar" />
     </div>
 </template>
 
@@ -33,10 +33,20 @@ export default {
     return {
       modif: false,
       user: {},
-      avatar: {}
+      avatar: {},
+      initial: ''
     }
   },
   methods: {
+    getInitials: function (name) {
+      let initials = name.split(' ')
+      if (initials.length > 1) {
+        initials = initials.shift().charAt(0) + initials.pop().charAt(0)
+      } else {
+        initials = name.substring(0, 2)
+      }
+      this.initial = initials.toUpperCase()
+    },
     refreshUser: function () {
       this.getUser()
     },
