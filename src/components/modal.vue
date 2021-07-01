@@ -2,6 +2,7 @@
   <div class="text-center">
     <v-dialog
       v-model="dialog"
+      persistent
       width="500"
     >
       <v-card>
@@ -9,7 +10,7 @@
           Privacy Policy
         </v-card-title>
         <v-card-text>
-Vous êtes sur le point de quitter la conversation. <br> Voulez-vous le conserver comme ami ? </v-card-text>
+{{ text }} <br> Voulez-vous le conserver comme ami ? </v-card-text>
 
         <v-divider></v-divider>
 
@@ -18,7 +19,7 @@ Vous êtes sur le point de quitter la conversation. <br> Voulez-vous le conserve
           <v-btn
             color="primary"
             text
-            @click="close"
+            @click="next"
           >
             Oui
           </v-btn>
@@ -38,11 +39,16 @@ Vous êtes sur le point de quitter la conversation. <br> Voulez-vous le conserve
 <script>
 export default {
   methods: {
+    next: function () {
+      this.$emit('next')
+    },
     close: function () {
       this.$emit('close')
     }
   },
   props: {
+    text: String,
+
     dialog: Boolean
   },
   data () {

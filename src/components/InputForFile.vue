@@ -6,7 +6,7 @@
      mdi-image-plus
     </v-icon>
                   </v-col>
-              <input class="inputfile" name="file" :id="idInput" type="file"  @change="file_selected" style="display:none;"  />
+              <input class="inputfile" accept="image/png, image/jpeg" name="file" :id="idInput" type="file"  @change="file_selected" style="display:none;"  />
   </div>
 </template>
 

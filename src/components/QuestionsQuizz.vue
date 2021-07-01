@@ -37,6 +37,7 @@
     <div v-show="index_question_courante === questions_reponses.length+1">
       <div class="text-question">Quizz terminé</div>
       <v-btn
+      @click=" connexion "
         align-center
         justify-center
         color="#F06292"
@@ -92,6 +93,9 @@ export default {
     ...mapGetters(['user_Id'])
   },
   methods: {
+    connexion: function () {
+      this.$router.push({ name: 'Connexion' })
+    },
     next: function () {
       if (this.index_question_courante === this.questions_reponses.length) {
         axios.post(`${process.env.VUE_APP_BACK_URL}/reponses_utilisateurs`, { reponses_utilisateur: this.reponse_utilisateur, id: parseInt(this.user_Id) })
