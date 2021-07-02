@@ -4,6 +4,9 @@ import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
 import Notifications from 'vue-notification'
+import moment from 'moment'
+
+Vue.prototype.moment = moment
 Vue.use(Notifications)
 
 new Vue({

@@ -5,7 +5,7 @@
     <template v-if="conversations  && conversations.length > 0">
       <template v-for="(conversationsListe) in conversations">
         <div v-if="conversationsListe.est_enregistre === null  " :key="conversationsListe.conversations_id" >
-            <Modal v-if="displayModal(conversationsListe)  && roomConnect" text="Cette utilisateur veux vous ajouter en ami." :dialog="dialog" @next ="nextPersonne" @close="dialog = false" ></Modal>
+            <Modal  text="Cette utilisateur veux vous ajouter en ami." :dialog="dialog && roomConnect" @next ="nextPersonne" @close="dialog = false" ></Modal>
         <v-divider :key="conversationsListe.conversations_id"></v-divider>
         <v-list-item  @click="connectToRoom(conversationsListe)" :key="conversationsListe.prenom">
           <v-list-item-avatar class="justify-center" v-if="conversationsListe.photo == undefined" color="#EC407A">
@@ -32,10 +32,10 @@
     <v-divider></v-divider>
     <template v-if="conversations  && conversations.length > 0">
       <template v-for="(conversationsListe) in conversations">
-        <div v-if="conversationsListe.est_enregistre === true " :key="conversationsListe.conversations_id" >
-            <Modal v-if="displayModal(conversationsListe)  && roomConnect" text="Cette utilisateur veux vous ajouter en ami." :dialog="dialog" @next ="nextPersonne" @close="dialog = false" ></Modal>
+        <div v-if="conversationsListe.est_enregistre === true " :key="conversationsListe.id" >
         <v-divider :key="conversationsListe.conversations_id"></v-divider>
         <v-list-item  @click="connectToRoom(conversationsListe)" :key="conversationsListe.prenom">
+            <Modal  text="Cette utilisateur veux vous ajouter en ami." :key="conversationsListe.prenom" :dialog="dialog && roomConnect" @next ="nextPersonne" @close="dialog = false" ></Modal>
           <v-list-item-avatar class="justify-center" v-if="conversationsListe.photo == undefined" color="#EC407A">
            <span class="white--text "> {{ getInitials(conversationsListe.prenom) }} </span>
           </v-list-item-avatar>
@@ -82,6 +82,7 @@ export default {
       return initials.toUpperCase()
     },
     connectToRoom: function (value) {
+      this.dialog = this.displayModal(value)
       this.roomConnect = true
       console.log(value)
       this.$emit('connect', value, this.getInitials(value.prenom))
@@ -89,9 +90,10 @@ export default {
   },
   data () {
     return {
+      test: '',
       roomConnect: false,
       initial: '',
-      dialog: true
+      dialog: false
     }
   },
   props: {

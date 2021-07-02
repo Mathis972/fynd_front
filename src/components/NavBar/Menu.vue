@@ -109,6 +109,7 @@ export default {
   },
   methods: {
     savePersonne: function (response) {
+      console.log(response)
       this.$emit('savePersonne', response)
     },
     modifProfil: function (params) {

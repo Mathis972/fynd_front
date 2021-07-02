@@ -52,25 +52,25 @@
                 color="grey darken-1"
                 size="52"
               >
-            <img v-if="userTalk "
+            <img v-if="userTalk.photo = '' "
               alt="Avatar"
               :src="userTalk.photo"
             >
             <span v-else class="white--text "> {{ userTalk.initiale }} </span>
               </v-avatar>
               <template>
-
                 <v-chip
                   :color=" checkUser(msg) ? '#7626DE' : 'grey darken-1'"
                   dark
-                  style="height:auto;white-space: normal;"
+                  style="font-size: 1.1rem;height:auto;white-space: normal;"
                   class="pa-4 mb-2"
                 >
                   {{ msg.contenu }}
                   <sub
-                    class="ml-2"
-                    style="font-size: 0.5rem;"
-                  >{{  }}</sub>
+                    class="ml-4"
+                    style="font-size: 0.7rem;"
+                  > <span>{{converteDateToDay(msg.createdAt)}}</span>
+</sub>
                 </v-chip>
               </template>
               <v-list>
@@ -115,6 +115,7 @@ import Menu from './NavBar/Menu'
 import Modal from '@/components/modal'
 import VueSocketIOExt from 'vue-socket.io-extended'
 import io from 'socket.io-client'
+
 Vue.config.productionTip = false
 const socketConnection = io(`${process.env.VUE_APP_BACK_URL}`)
 
@@ -177,6 +178,7 @@ export default {
     },
 
     savePersonne: async function (response) {
+      console.log(response)
       this.dialog = false
       if (response === true) {
         this.userTalk.est_user_1 ? await axios.put(`${process.env.VUE_APP_BACK_URL}/conversations/${this.conversations_id}`, { ajout_utilisateurs1: true, est_enregistre: true })
@@ -187,7 +189,7 @@ export default {
           : await axios.put(`${process.env.VUE_APP_BACK_URL}/conversations/${this.conversations_id}`, { ajout_utilisateurs2: true }).then(r => this.$socket.client.emit('modal', true)
           )
       }
-      // this.$socket.client.emit('modal', true)
+      this.$socket.client.emit('modal', true)
       this.match()
     },
     // fonction qui permet de récuperer les arrays de match
@@ -197,19 +199,26 @@ export default {
           return r.data
         })
       this.arrayMatch = userMatch
-      const idUserTalk = this.arrayMatch[0].util2
-      await axios.post(`${process.env.VUE_APP_BACK_URL}/conversations`, { fk_utilisateur1_id: parseInt(this.user_Id), fk_utilisateur2_id: this.arrayMatch[0].util2 })
-        .then((r) => {
-          axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${idUserTalk}`)
-            .then(r => {
-              this.userTalk = r.data
-              localStorage.setItem('userTalk', JSON.stringify(this.userTalk))
-              this.recupConv()
-            })
-          this.$socket.client.emit('joinRoom', r.data.id)
-          this.conversations_id = r.data.id
-          localStorage.setItem('conversationId', parseInt(this.conversations_id))
-        })
+      if (this.arrayMatch.length !== 0) {
+        const idUserTalk = this.arrayMatch[0].util2
+        await axios.post(`${process.env.VUE_APP_BACK_URL}/conversations`, { fk_utilisateur1_id: parseInt(this.user_Id), fk_utilisateur2_id: this.arrayMatch[0].util2 })
+          .then((r) => {
+            axios.get(`${process.env.VUE_APP_BACK_URL}/utilisateurs/${idUserTalk}`)
+              .then(r => {
+                this.userTalk = r.data
+                localStorage.setItem('userTalk', JSON.stringify(this.userTalk))
+              })
+              .catch((value) => {
+                console.log(value)
+              })
+            this.recupConv()
+            this.$socket.client.emit('joinRoom', r.data.id)
+            this.conversations_id = r.data.id
+            localStorage.setItem('conversationId', parseInt(this.conversations_id))
+          })
+      } else {
+        this.recupConv()
+      }
     },
     // fonction qui permet check qui envoie le message
 
@@ -341,6 +350,14 @@ export default {
     },
     idLaunch () {
       this.$socket.client.emit('idLaunch', this.user_Id)
+    },
+    converteDateToDay: function (date) {
+      date = new Date(date)
+      if (date.getHours() < 12) {
+        return `${new Intl.DateTimeFormat('fr').format(date)} : 0${date.getHours()}h ${date.getMinutes()} `
+      } else {
+        return `${new Intl.DateTimeFormat('fr').format(date)} : ${date.getHours()} `
+      }
     }
   },
   sockets: {
