@@ -68,7 +68,7 @@
       </v-sheet>
 
       <v-list>
-       <list-user v-if="path =='Chat'" @connect="RoomConnect" :conversations="conversations" ></list-user>
+       <list-user :notificationRoom="notificationRoom" :notification="notification" @savePersonne="savePersonne" :userTalk="userTalk" v-if="path =='Chat'" @connect="RoomConnect" :conversations="conversations" ></list-user>
        <nav-profil @modif="modifProfil" v-else-if="path =='Profil' && modif == false" textModif="Modifier profil"></nav-profil>
        <nav-profil @modif="goProfil" v-else-if="path =='Profil' && modif == true " textModif="Revenir au profil"></nav-profil>
       </v-list>
@@ -80,14 +80,17 @@
 import ListUser from '@/components/NavBar/ListUser'
 import NavProfil from '@/components/NavBar/NavProfil'
 import { mapGetters } from 'vuex'
-
+// import axios from 'axios'
 export default {
   props: {
+    userTalk: Object,
     conversations: Array,
     modif: Boolean,
     user: Object,
     avatar: Object,
-    initial: String
+    initial: String,
+    notification: Boolean,
+    notificationRoom: Number
 
   },
   computed: {
@@ -96,6 +99,7 @@ export default {
   data () {
     return {
       path: '',
+      conversation: [],
       listMenu: [
         { title: 'Mon compte', action: 'Mon compte' },
         { title: 'Déconnexion', action: 'deconnexion' }
@@ -106,6 +110,10 @@ export default {
     this.path = this.$route.name
   },
   methods: {
+    savePersonne: function (response) {
+      console.log(response)
+      this.$emit('savePersonne', response)
+    },
     modifProfil: function (params) {
       this.$emit('modif')
     },
@@ -121,6 +129,8 @@ export default {
         this.$router.push({ name: 'Profil' })
       } else if (action === 'deconnexion') {
         this.$store.dispatch('logOut')
+        localStorage.removeItem('conversationId')
+        localStorage.removeItem('userTalk')
         this.$router.push({ name: 'Connexion' })
       }
     }
