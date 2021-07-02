@@ -314,6 +314,7 @@ export default {
       this.initialUser = this.getInitials(this.user.prenom)
     },
     async connectToRoom (utilisateur, initial) {
+      this.recupConv()
       this.notification = false
       this.messages = ''
       this.conversations_id = utilisateur.conversations_id
@@ -358,7 +359,7 @@ export default {
       if (date.getHours() < 12) {
         return `${new Intl.DateTimeFormat('fr').format(date)} : 0${date.getHours()}h ${date.getMinutes()} `
       } else {
-        return `${new Intl.DateTimeFormat('fr').format(date)} : ${date.getHours()} `
+        return `${new Intl.DateTimeFormat('fr').format(date)} : ${date.getHours()}h ${date.getMinutes()} `
       }
     }
   },
