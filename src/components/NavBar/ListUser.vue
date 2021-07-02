@@ -19,6 +19,9 @@
             <v-list-item-subtitle v-if="conversationsListe.messages" v-html="conversationsListe.messages.contenu">
             </v-list-item-subtitle>
           </v-list-item-content>
+                    <v-list-item-icon>
+          <v-icon v-if="DisplayNotif(conversationsListe)" color="orange" size="15">mdi-square-rounded</v-icon>
+        </v-list-item-icon>
         </v-list-item>
         </div>
       </template>
@@ -47,6 +50,9 @@
             <v-list-item-subtitle v-if="conversationsListe.messages" v-html="conversationsListe.messages.contenu">
             </v-list-item-subtitle>
           </v-list-item-content>
+          <v-list-item-icon>
+          <v-icon v-if='DisplayNotif(conversationsListe)' color="orange" size="15">mdi-square-rounded</v-icon>
+        </v-list-item-icon>
         </v-list-item>
         </div>
       </template>
@@ -81,6 +87,15 @@ export default {
       }
       return initials.toUpperCase()
     },
+    DisplayNotif: function (conversation) {
+      console.log(conversation.conversations_id)
+      console.log(this.notificationRoom === conversation.conversations_id && this.notification === true)
+      if (this.notificationRoom === conversation.conversations_id && this.notification === true) {
+        return true
+      } else {
+        return false
+      }
+    },
     connectToRoom: function (value) {
       this.dialog = this.displayModal(value)
       this.roomConnect = true
@@ -98,7 +113,9 @@ export default {
   },
   props: {
     userTalk: Object,
-    conversations: Array
+    conversations: Array,
+    notification: Boolean,
+    notificationRoom: Number
   }
 }
 

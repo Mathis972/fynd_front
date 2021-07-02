@@ -35,7 +35,7 @@
           <!-- <span class="time">{{ time }}</span> -->
           <v-btn @click="dialog = true"> Next </v-btn>
     </v-app-bar>
-<Menu :avatar="avatar" @savePersonne="savePersonne" :initial="initialUser" :user="user" :userTalk="userTalk" @connectToRoom="connectToRoom" :conversations="conversations"  ></Menu>
+<Menu :notificationRoom="notificationRoom" :notification="notification" :avatar="avatar" @savePersonne="savePersonne" :initial="initialUser" :user="user" :userTalk="userTalk" @connectToRoom="connectToRoom" :conversations="conversations"  ></Menu>
     <v-main>
       <v-card
         flat
@@ -90,7 +90,7 @@
         <v-col cols="12">
           <v-text-field
             v-model="inputMessages"
-            label="type_a_message"
+            label="Ecrire votre message"
             type="text"
             no-details
             outlined
@@ -314,6 +314,7 @@ export default {
       this.initialUser = this.getInitials(this.user.prenom)
     },
     async connectToRoom (utilisateur, initial) {
+      this.notification = false
       this.messages = ''
       this.conversations_id = utilisateur.conversations_id
       this.userTalk = {
@@ -323,8 +324,8 @@ export default {
         id: utilisateur.id,
         initiale: initial !== undefined ? initial : ''
       }
-      localStorage.setItem('userTalk', JSON.stringify(this.userTalk))
-      localStorage.setItem('conversationId', parseInt(this.conversations_id))
+      // localStorage.setItem('userTalk', JSON.stringify(this.userTalk))
+      // localStorage.setItem('conversationId', parseInt(this.conversations_id))
       this.$socket.client.emit('joinRoom', utilisateur.conversations_id)
       const self = this
       if (this.conversations_id) {
@@ -343,6 +344,7 @@ export default {
       await axios.post(`${process.env.VUE_APP_BACK_URL}/messages`, message)
         .then((r) => {
           this.$socket.client.emit('message', r.data)
+          this.$socket.client.emit('notification', true)
         }).catch((value) => {
         })
       message = ''
@@ -364,14 +366,21 @@ export default {
     connect () {
       console.log('connected to chat server')
     },
-    message (data) {
-      this.messages.push(data)
+    message (data, room) {
+      console.log('room' + room)
+      if (room === this.conversations_id) {
+        this.messages.push(data)
+      }
     },
-    sendNotification () {
-      console.log('notification')
+    notification (data, room) {
+      console.log(data)
+      this.notification = data
+      console.log(room)
+      this.notificationRoom = room
     }
   },
   data: () => ({
+    notificationRoom: undefined,
     userTalk: {},
     dialog2: false,
     dialog: false,
@@ -386,6 +395,7 @@ export default {
     conversations: undefined,
     drawer: null,
     user: {},
+    notification: false,
     avatar: {}
   })
 }

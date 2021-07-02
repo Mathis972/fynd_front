@@ -68,7 +68,7 @@
       </v-sheet>
 
       <v-list>
-       <list-user @savePersonne="savePersonne" :userTalk="userTalk" v-if="path =='Chat'" @connect="RoomConnect" :conversations="conversations" ></list-user>
+       <list-user :notificationRoom="notificationRoom" :notification="notification" @savePersonne="savePersonne" :userTalk="userTalk" v-if="path =='Chat'" @connect="RoomConnect" :conversations="conversations" ></list-user>
        <nav-profil @modif="modifProfil" v-else-if="path =='Profil' && modif == false" textModif="Modifier profil"></nav-profil>
        <nav-profil @modif="goProfil" v-else-if="path =='Profil' && modif == true " textModif="Revenir au profil"></nav-profil>
       </v-list>
@@ -88,7 +88,9 @@ export default {
     modif: Boolean,
     user: Object,
     avatar: Object,
-    initial: String
+    initial: String,
+    notification: Boolean,
+    notificationRoom: Number
 
   },
   computed: {
